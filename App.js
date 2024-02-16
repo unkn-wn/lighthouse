@@ -2,16 +2,8 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-
-
-const HomeScreen = ({navigation}) => {
-  return (
-    <View style={styles.container}>
-      <Text>This is the Home Screen</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import HomeScreen from './HomeScreen.js'
+import AccountScreen from './AccountScreen.js'
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +12,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Account" component={AccountScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     
