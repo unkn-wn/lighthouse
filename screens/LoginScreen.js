@@ -3,13 +3,17 @@ import { StyleSheet, Text, View, Pressable, Image, TextInput, Keyboard, Touchabl
 import GLOBAL from '../global.js';
 
 const LoginScreen = ({ navigation }) => {
+    const [password, setPassword] = useState('');
+    const [usernameEmail, setUsernameEmail] = useState('');
 
     function login() {
         GLOBAL.loggedIn = true;
+
+        console.log('Username/Email: ', usernameEmail);
+        console.log('Password: ', password);
+
         navigation.navigate('Home', { screen: 'Home' });
     }
-
-    const [password, setPassword] = useState('');
 
     return (
         <View className="flex-1 h-screen bg-white">
@@ -19,10 +23,14 @@ const LoginScreen = ({ navigation }) => {
                         source={require('../assets/logo.png/')}
                     />
                     <LoginTextInput
+                        state={usernameEmail}
+                        setState={setUsernameEmail}
                         placeholder="Username or Email"
                         secureTextEntry={false}
                     />
                     <LoginTextInput
+                        state={password}
+                        setState={setPassword}
                         placeholder="Password"
                         secureTextEntry={true}
                         onChangeText={setPassword}
@@ -45,14 +53,16 @@ const LoginScreen = ({ navigation }) => {
     );
 }
 
-function LoginTextInput({ placeholder, secureTextEntry }) {
-    return (
-        <TextInput
-            placeholder={placeholder}
-            className="bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2"
-            secureTextEntry={secureTextEntry}
-        />
-    )
+function LoginTextInput({ placeholder, secureTextEntry, state, setState }) {
+	return (
+		<TextInput
+			placeholder={placeholder}
+			className="bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2"
+			secureTextEntry={secureTextEntry}
+			onChangeText={setState}
+			{...state}
+		/>
+	)
 }
 
 export default LoginScreen;
