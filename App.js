@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import LoginScreen from './screens/LoginScreen.js';
+import SignupScreen from './screens/SignupScreen.js';
 import MapScreen from './screens/MapScreen.js'
 import AccountContainer from './screens/AccountContainer.js'
 
@@ -19,7 +20,10 @@ const App = () => {
         {GLOBAL.loggedIn ? (
           <Stack.Screen name="LoginDummy" component={() => null} />
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+          </>
         )}
         <Stack.Screen name="Home" options={{ headerShown: false, gestureEnabled: false }} >
           {props => (
