@@ -1,6 +1,6 @@
 import { Text, View, Pressable, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useState } from 'react';
-import Textbox from '../components/Textbox.js'
+import Textbox from './components/Textbox.js'
 
 import GLOBAL from '../global.js';
 

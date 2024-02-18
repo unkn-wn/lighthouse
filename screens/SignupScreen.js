@@ -1,7 +1,7 @@
 import { Text, View, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useState } from 'react';
-import Textbox from '../components/Textbox.js'
+import Textbox from './components/Textbox.js'
 // https://icons.expo.fyi/Index
 
 import GLOBAL from '../global.js';
