@@ -18,7 +18,7 @@ const App = () => {
 
       <Stack.Navigator>
         {GLOBAL.loggedIn ? (
-          <Stack.Screen name="LoginDummy" component={() => null} />
+          <Stack.Screen name=" " component={() => null} />
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>

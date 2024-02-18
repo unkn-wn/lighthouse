@@ -1,12 +1,25 @@
 import { StyleSheet, Text, View, Button, TextInput, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useState } from 'react';
 // https://icons.expo.fyi/Index
 
 import GLOBAL from '../global.js';
 
 const SignupScreen = ({ navigation }) => {
+	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [retypedPassword, setRetypePassword] = useState('');
+
+
 	function signup() {
 		GLOBAL.loggedIn = true;
+
+		console.log('Username:', username);
+		console.log('Email:', email);
+		console.log('Password:', password);
+		console.log('Retyped Password:', retypedPassword);
+
 		navigation.navigate('Home', { screen: 'Home' });
 	}
 
@@ -23,18 +36,26 @@ const SignupScreen = ({ navigation }) => {
 					<SignupTextInput
 						placeholder="Username"
 						secureTextEntry={false}
+						state={username}
+						setState={setUsername}
 					/>
 					<SignupTextInput
 						placeholder="Email address"
 						secureTextEntry={false}
+						state={email}
+						setState={setEmail}
 					/>
 					<SignupTextInput
 						placeholder="Password"
 						secureTextEntry={true}
+						state={password}
+						setState={setPassword}
 					/>
 					<SignupTextInput
 						placeholder="Re-enter password"
 						secureTextEntry={true}
+						state={retypedPassword}
+						setState={setRetypePassword}
 					/>
 					<Button
 						title="Sign up"
@@ -53,12 +74,14 @@ const SignupScreen = ({ navigation }) => {
 	);
 }
 
-function SignupTextInput({ placeholder, secureTextEntry }) {
+function SignupTextInput({ placeholder, secureTextEntry, state, setState }) {
 	return (
 		<TextInput
 			placeholder={placeholder}
 			className="bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2"
 			secureTextEntry={secureTextEntry}
+			onChangeText={setState}
+			{...state}
 		/>
 	)
 }
