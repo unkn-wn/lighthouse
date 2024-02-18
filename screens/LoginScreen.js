@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, Pressable, Image, TextInput, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Text, View, Pressable, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useState } from 'react';
+import Textbox from '../components/Textbox.js'
 
 import GLOBAL from '../global.js';
 
@@ -23,13 +24,13 @@ const LoginScreen = ({ navigation }) => {
                     <Image className="object-scale-down h-48 w-48"
                         source={require('../assets/logo.png/')}
                     />
-                    <LoginTextInput
+                    <Textbox
                         state={usernameEmail}
                         setState={setUsernameEmail}
                         placeholder="Username or Email"
                         secureTextEntry={false}
                     />
-                    <LoginTextInput
+                    <Textbox
                         state={password}
                         setState={setPassword}
                         placeholder="Password"
@@ -52,18 +53,6 @@ const LoginScreen = ({ navigation }) => {
             </View>
         </View>
     );
-}
-
-function LoginTextInput({ placeholder, secureTextEntry, state, setState }) {
-	return (
-		<TextInput
-			placeholder={placeholder}
-			className="bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2"
-			secureTextEntry={secureTextEntry}
-			onChangeText={setState}
-			{...state}
-		/>
-	)
 }
 
 export default LoginScreen;

@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View, Button, TextInput, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
+import { Text, View, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useState } from 'react';
+import Textbox from '../components/Textbox.js'
 // https://icons.expo.fyi/Index
 
 import GLOBAL from '../global.js';
@@ -33,25 +34,25 @@ const SignupScreen = ({ navigation }) => {
 						</Pressable>
 						<Text className="text-3xl font-bold mb-20 text-left text-primary">Create Account</Text>
 					</View>
-					<SignupTextInput
+					<Textbox
 						placeholder="Username"
 						secureTextEntry={false}
 						state={username}
 						setState={setUsername}
 					/>
-					<SignupTextInput
+					<Textbox
 						placeholder="Email address"
 						secureTextEntry={false}
 						state={email}
 						setState={setEmail}
 					/>
-					<SignupTextInput
+					<Textbox
 						placeholder="Password"
 						secureTextEntry={true}
 						state={password}
 						setState={setPassword}
 					/>
-					<SignupTextInput
+					<Textbox
 						placeholder="Re-enter password"
 						secureTextEntry={true}
 						state={retypedPassword}
@@ -74,18 +75,5 @@ const SignupScreen = ({ navigation }) => {
 		</View>
 	);
 }
-
-function SignupTextInput({ placeholder, secureTextEntry, state, setState }) {
-	return (
-		<TextInput
-			placeholder={placeholder}
-			className="bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2"
-			secureTextEntry={secureTextEntry}
-			onChangeText={setState}
-			{...state}
-		/>
-	)
-}
-
 
 export default SignupScreen;
