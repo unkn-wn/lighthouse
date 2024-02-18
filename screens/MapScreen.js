@@ -1,8 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, Linking, AppState, Modal } from 'react-native';
+import { Text, View, Button, Linking, AppState, Modal } from 'react-native';
 import { useEffect, useState, useRef } from 'react';
 
 import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
 
 
 const MapScreen = ({ navigation }) => {
@@ -75,7 +76,7 @@ const MapScreen = ({ navigation }) => {
 
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white items-center justify-center">
       <Modal
         animationType="slide"
         transparent={true}
@@ -84,32 +85,33 @@ const MapScreen = ({ navigation }) => {
           setModalVisible(false);
         }}
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-          <View style={{ backgroundColor: 'white', width: '75%', padding: 20, borderRadius: 10 }}>
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white w-5/6 p-4 rounded-lg">
             <Text>Permission to access location was denied. Lighthouse requires your location to find the closest parking options near you. Open settings?</Text>
             {/* Ok and Cancel buttons */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 }}>
+            <View className="flex-row justify-around mt-2">
               <Button title="No" onPress={() => setModalVisible(false)} />
               <Button title="Yes" onPress={() => { Linking.openSettings(); setModalVisible(false) }} />
             </View>
           </View>
         </View>
       </Modal>
-      <Text>This is the Home Screen</Text>
-      <Text>state: {appStateVisible}</Text>
-      <Text>{locationText}</Text>
+
+      <MapView
+        className="w-full h-full"
+        provider=''
+        showsUserLocation={true}
+        showsMyLocationButton={true}
+        initialRegion={{
+          latitude: 40.426170,
+          longitude: -86.920284,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.02,
+        }}
+      />
       <StatusBar style="auto" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 export default MapScreen;
