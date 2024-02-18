@@ -29,7 +29,7 @@ const SignupScreen = ({ navigation }) => {
 				<View className="flex-1 items-center mt-20">
 					<View className='flex flex-row w-3/4'>
 						<Pressable onPress={() => navigation.navigate('Login')} className="pt-1.5 mr-2">
-							<AntDesign name="caretleft" size={24} style={{ color:'#fe575f' }} />
+							<AntDesign name="caretleft" size={24} style={{ color: '#fe575f' }} />
 						</Pressable>
 						<Text className="text-3xl font-bold mb-20 text-left text-primary">Create Account</Text>
 					</View>
@@ -57,18 +57,19 @@ const SignupScreen = ({ navigation }) => {
 						state={retypedPassword}
 						setState={setRetypePassword}
 					/>
-					<Button
-						title="Sign up"
+					<Pressable
+						className="bg-primary w-1/2 rounded-xl py-5 mt-3"
 						onPress={() => signup()}
-					/>
+					>
+						<Text className="text-white font-bold text-center text-lg">SIGNUP</Text>
+					</Pressable>
 				</View>
 			</TouchableWithoutFeedback>
-			<View className="my-12">
-				<Text className="text-center">Already have an account?</Text>
-				<Button
-					title="Sign in!"
-					className="text-red-300"
-					onPress={() => navigation.navigate('Login')} />
+			<View className="my-12 flex-row justify-center space-x-1">
+				<Text className="text-secondary">Already have an account?</Text>
+				<Pressable onPress={() => navigation.navigate('Login')}>
+					<Text className="text-primary">Log in!</Text>
+				</Pressable>
 			</View>
 		</View>
 	);
