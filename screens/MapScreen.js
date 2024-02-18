@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button } from 'react-native';
 
-const HomeScreen = ({navigation}) => {
+const MapScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <Text>This is the Home Screen</Text>
@@ -19,4 +19,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default MapScreen;

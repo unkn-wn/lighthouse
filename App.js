@@ -1,23 +1,41 @@
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from './screens/HomeScreen.js'
+import LoginScreen from './screens/LoginScreen.js';
+import MapScreen from './screens/MapScreen.js'
 import AccountContainer from './screens/AccountContainer.js'
 
+import GLOBAL from './global.js';
+
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen
-          name="Account Container"
-          component={AccountContainer}
-          options={{ headerShown: false }}
-        />
-      </Tab.Navigator>
+
+      <Stack.Navigator>
+        {GLOBAL.loggedIn ? (
+          <Stack.Screen name="LoginDummy" component={() => null} />
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        )}
+        <Stack.Screen name="Home" options={{ headerShown: false, gestureEnabled: false }} >
+          {props => (
+            <Tab.Navigator {...props}>
+              <Tab.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
+              <Tab.Screen
+                name="Account Container"
+                component={AccountContainer}
+                options={{ headerShown: false }}
+              />
+            </Tab.Navigator>
+          )}
+        </Stack.Screen>
+      </Stack.Navigator>
+
+
     </NavigationContainer>
   );
 }

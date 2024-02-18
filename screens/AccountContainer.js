@@ -1,9 +1,9 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, View, Button, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createStackNavigator } from '@react-navigation/stack'
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 const checkPasswords = (currentPass, newPass, reEnter) => {
   // check if the currentPass = the user's password
 
@@ -16,7 +16,7 @@ const checkPasswords = (currentPass, newPass, reEnter) => {
 }
 
 const EditPasswordScreen = ({navigation}) => {
-  
+
   const [currentPassword, onChangeCur] = React.useState('');
   const [newPassword, onChangeNew] = React.useState('');
   const [reEnterPassword, onChangeRe] = React.useState('');
@@ -69,7 +69,7 @@ const AccountScreen = ({navigation}) => {
 const AccountContainer = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Account" component={AccountScreen} />
+      <Stack.Screen name="Account" component={AccountScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Change Password" component={EditPasswordScreen} />
     </Stack.Navigator>
   )
