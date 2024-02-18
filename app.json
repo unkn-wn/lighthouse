@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Lighthouse",
+    "slug": "Lighthouse",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
