@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, Pressable, Image, TextInput, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { useState } from 'react';
 
 import GLOBAL from '../global.js';
 
@@ -18,7 +19,7 @@ const LoginScreen = ({ navigation }) => {
     return (
         <View className="flex-1 h-screen bg-white">
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View className="flex-1 items-center mt-6">
+                <View className="flex-1 items-center mt-20">
                     <Image className="object-scale-down h-48 w-48"
                         source={require('../assets/logo.png/')}
                     />
@@ -35,7 +36,7 @@ const LoginScreen = ({ navigation }) => {
                         secureTextEntry={true}
                         onChangeText={setPassword}
                     />
-                    <Pressable 
+                    <Pressable
                         className="bg-primary w-1/2 rounded-xl py-5 mt-3"
                         onPress={() => login()}
                     >
