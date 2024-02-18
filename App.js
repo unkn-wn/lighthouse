@@ -1,21 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Button } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import HomeScreen from './HomeScreen.js'
-import AccountScreen from './AccountScreen.js'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import HomeScreen from './screens/HomeScreen.js'
+import AccountContainer from './screens/AccountContainer.js'
 
-const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Account" component={AccountScreen} />
-      </Stack.Navigator>
+      <Tab.Navigator>
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen
+          name="Account Container"
+          component={AccountContainer}
+          options={{ headerShown: false }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
-    
   );
 }
 

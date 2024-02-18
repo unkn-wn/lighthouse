@@ -6,12 +6,6 @@ const HomeScreen = ({navigation}) => {
     <View style={styles.container}>
       <Text>This is the Home Screen</Text>
       <StatusBar style="auto" />
-      <Button
-        title="Account Details"
-        onPress = {() =>
-          navigation.navigate('Account')
-        }
-      />
     </View>
   );
 }
