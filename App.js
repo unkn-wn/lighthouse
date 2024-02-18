@@ -22,7 +22,7 @@ const App = () => {
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
           </>
         )}
         <Stack.Screen name="Home" options={{ headerShown: false, gestureEnabled: false }} >
