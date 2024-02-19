@@ -3,14 +3,16 @@ import { Text, View, Button, Linking, AppState, Modal } from 'react-native';
 import { useEffect, useState, useRef } from 'react';
 
 import * as Location from 'expo-location';
-import MapView from 'react-native-maps';
+import MapView, { Marker, Callout } from 'react-native-maps';
+// https://github.com/react-native-maps/react-native-maps/blob/HEAD/docs/mapview.md
+// https://www.npmjs.com/package/react-native-maps
 
 
 const MapScreen = ({ navigation }) => {
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const [locationRunning, setLocationRunning] = useState(false);
-  const [locationText, setLocationText] = useState("");
+  const [location, setLocation] = useState({ "coords": { "latitude": 40.426170, "longitude": -86.920284, "accuracy": 0, "altitude": 0, "heading": 0, "speed": 0, "altitudeAccuracy": 0 }, "timestamp": 0 });
   const [modalVisible, setModalVisible] = useState(false);
 
   // This useEffect is for checking if app is focused or not
@@ -20,7 +22,9 @@ const MapScreen = ({ navigation }) => {
         appState.current.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        startLocation();
+        if (!locationRunning) {
+          startLocation();
+        }
       }
 
       appState.current = nextAppState;
@@ -44,7 +48,7 @@ const MapScreen = ({ navigation }) => {
 
     if (status !== 'granted') {
       setLocationRunning(false);
-      setLocationText('Permission to access location was denied. Please open settings and allow location access.');
+      // setLocation({});
       setModalVisible(true);
       return;
     }
@@ -58,7 +62,7 @@ const MapScreen = ({ navigation }) => {
           distanceInterval: 0,
         },
         (loc) => {
-          setLocationText(JSON.stringify(loc));
+          setLocation(loc);
         }
       );
 
@@ -99,19 +103,45 @@ const MapScreen = ({ navigation }) => {
 
       <MapView
         className="w-full h-full"
-        provider=''
+        provider='google' // 'google' for google maps
         showsUserLocation={true}
         showsMyLocationButton={true}
-        initialRegion={{
-          latitude: 40.426170,
-          longitude: -86.920284,
+        showsCompass={true}
+        region={{
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.02,
         }}
-      />
+        onMarkerPress={(e) => {
+          console.log(e.nativeEvent);
+        }}
+      >
+        <Marker
+          coordinate={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          }}
+          title="You are here"
+          description="This is your current location"
+        >
+
+        </Marker>
+      </MapView>
       <StatusBar style="auto" />
     </View>
   );
 }
+
+// function DetailedMarker({ point, onToggle }) {
+//   const { coordinates, title, description, showDetails } = point;
+
+//   return (
+//     <TouchableOpacity onPress={onToggle} className="flex-1 bottom-0 w-full h-1/3 bg-red-500">
+//       <Marker coordinate={coordinates} />
+//       {showDetails && <View><Text>{title} {description}</Text></View>}
+//     </TouchableOpacity>
+//   )
+// }
 
 export default MapScreen;
