@@ -1,18 +1,32 @@
-import { Text, View, Pressable, Image, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { useState } from 'react';
-import Textbox from './components/Textbox.js'
+import { Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { useEffect, useState } from 'react';
+import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
 
+import Textbox from './components/Textbox.js'
 import GLOBAL from '../global.js';
+import db from '../firebaseConfig.js';
 
 const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [usernameEmail, setUsernameEmail] = useState('');
 
-  function login() {
+
+  const login = async () => {
     GLOBAL.loggedIn = true;
 
     console.log('Username/Email: ', usernameEmail);
     console.log('Password: ', password);
+
+    try {
+      console.log("Adding...");
+      const docRef = await addDoc(collection(db, "test"), {
+        usernameEmail: usernameEmail,
+        password: password
+      }).catch(e => console.error(e));
+      Alert.alert("Doc written with ID: ", docRef.id);
+    } catch (e) {
+      Alert.alert("Error adding document, ", e);
+    }
 
     navigation.navigate('Home', { screen: 'Home' });
   }
