@@ -1,34 +1,80 @@
 import { Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { useEffect, useState } from 'react';
-import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, collection } from 'firebase/firestore';
 
 import Textbox from './components/Textbox.js'
 import GLOBAL from '../global.js';
-import db from '../firebaseConfig.js';
+import { db, auth } from '../firebaseConfig.js';
 
 const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [usernameEmail, setUsernameEmail] = useState('');
-
+  const [error, setError] = useState('');
+  const errorMessage = "Username/email or password is incorrect";
 
   const login = async () => {
     GLOBAL.loggedIn = true;
+    setError('');
+
+    if (usernameEmail === '' || password === '') {
+      console.log('Error: All fields must be filled out');
+      setError('All fields must be filled out');
+      return;
+    }
+
+    const emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (!usernameEmail.match(emailFormat)) {
+
+      /*const usernameReference = db.collection('users');
+      const usernameSnapshot = await usernameReference.get();
+      usernameSnapshot.forEach((doc) => {
+        console.log(doc.id, '=>', doc.data());
+      });*/
+
+      await getDoc(doc(db, "users", usernameEmail))
+        .then((doc) => {
+          if (doc.exists()) {
+            setUsernameEmail(doc.data().email);
+            console.log('>>>> Username/Email:', usernameEmail);
+            return;
+          } else {
+            console.log("Error: no user found for username/email");
+            setError(errorMessage);
+            return;
+          }
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+          setError(error.message);
+          return;
+        }
+      );
+    }
 
     console.log('Username/Email: ', usernameEmail);
     console.log('Password: ', password);
 
-    try {
-      console.log("Adding...");
-      const docRef = await addDoc(collection(db, "test"), {
-        usernameEmail: usernameEmail,
-        password: password
-      }).catch(e => console.error(e));
-      Alert.alert("Doc written with ID: ", docRef.id);
-    } catch (e) {
-      Alert.alert("Error adding document, ", e);
+    console.log(error);
+    if (error == '') {
+
+
+      console.log("asjdjksajdlsahl")
+      await signInWithEmailAndPassword(auth, usernameEmail, password)
+        .then((userCredential) => {
+          // Signed in
+          console.log('User logged in:', userCredential.user.uid);
+          navigation.navigate('Home', { screen: 'Home' });
+          // const user = firebase.auth().currentUser;
+
+        })
+        .catch((error) => {
+          console.log('Error:', error.message);
+          setError(errorMessage);
+        }
+      );
     }
 
-    navigation.navigate('Home', { screen: 'Home' });
   }
 
   return (
@@ -38,6 +84,7 @@ const LoginScreen = ({ navigation }) => {
           <Image className="object-scale-down h-48 w-48"
             source={require('../assets/logo.png/')}
           />
+          <Text className="text-primary w-2/3 text-center">{error}</Text>
           <Textbox
             state={usernameEmail}
             setState={setUsernameEmail}
@@ -53,7 +100,7 @@ const LoginScreen = ({ navigation }) => {
           />
           <Pressable
             className="bg-primary w-1/2 rounded-xl py-5 mt-3"
-            onPress={() => login()}
+            onPress={() => {setError(''); login()}}
           >
             <Text className="text-white font-bold text-center text-lg">LOGIN</Text>
           </Pressable>
