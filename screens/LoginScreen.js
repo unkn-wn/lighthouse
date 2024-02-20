@@ -10,10 +10,18 @@ import { db, auth } from '../firebaseConfig.js';
 const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [usernameEmail, setUsernameEmail] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const errorMessage = "Username/email or password is incorrect";
 
-  const login = async () => {
+  useEffect(() => {
+    if (email != '') {
+      console.log('Email State Updated: ', email);
+      login();
+    }
+  }, [email]);
+
+  const loginInfo = async () => {
     GLOBAL.loggedIn = true;
     setError('');
 
@@ -25,18 +33,11 @@ const LoginScreen = ({ navigation }) => {
 
     const emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
     if (!usernameEmail.match(emailFormat)) {
-
-      /*const usernameReference = db.collection('users');
-      const usernameSnapshot = await usernameReference.get();
-      usernameSnapshot.forEach((doc) => {
-        console.log(doc.id, '=>', doc.data());
-      });*/
-
       await getDoc(doc(db, "users", usernameEmail))
         .then((doc) => {
           if (doc.exists()) {
-            setUsernameEmail(doc.data().email);
-            console.log('>>>> Username/Email:', usernameEmail);
+            console.log(doc.data());
+            setEmail(doc.data().email);
             return;
           } else {
             console.log("Error: no user found for username/email");
@@ -46,27 +47,25 @@ const LoginScreen = ({ navigation }) => {
         })
         .catch((error) => {
           console.log('Error:', error);
-          setError(error.message);
+          setError(errorMessage);
           return;
         }
       );
+    } else {
+      setEmail(usernameEmail);
     }
+  }
 
-    console.log('Username/Email: ', usernameEmail);
-    console.log('Password: ', password);
-
-    console.log(error);
+  const login = async () => {
     if (error == '') {
-
-
-      console.log("asjdjksajdlsahl")
-      await signInWithEmailAndPassword(auth, usernameEmail, password)
+      console.log('Email:', email);
+      console.log('Password: ', password);
+      await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
           console.log('User logged in:', userCredential.user.uid);
           navigation.navigate('Home', { screen: 'Home' });
           // const user = firebase.auth().currentUser;
-
         })
         .catch((error) => {
           console.log('Error:', error.message);
@@ -74,7 +73,6 @@ const LoginScreen = ({ navigation }) => {
         }
       );
     }
-
   }
 
   return (
@@ -100,7 +98,7 @@ const LoginScreen = ({ navigation }) => {
           />
           <Pressable
             className="bg-primary w-1/2 rounded-xl py-5 mt-3"
-            onPress={() => {setError(''); login()}}
+            onPress={() => {setError(''); loginInfo()}}
           >
             <Text className="text-white font-bold text-center text-lg">LOGIN</Text>
           </Pressable>
