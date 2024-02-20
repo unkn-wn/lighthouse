@@ -1,4 +1,4 @@
-import { Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Alert, Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useEffect, useState } from 'react';
 import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
 
@@ -16,6 +16,9 @@ const LoginScreen = ({ navigation }) => {
 
     console.log('Username/Email: ', usernameEmail);
     console.log('Password: ', password);
+
+    // BUG: User can press the login button multiple times before the app switches to the map,
+    //      resulting in multiple database accesses
 
     try {
       console.log("Adding...");
