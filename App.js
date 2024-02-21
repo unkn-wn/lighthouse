@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import LoginScreen from './screens/LoginScreen.js';
 import SignupScreen from './screens/SignupScreen.js';
 import MapScreen from './screens/MapScreen.js'
-import AccountContainer from './screens/AccountContainer.js'
+import ProfileContainer from './screens/ProfileContainer.js'
 
 import GLOBAL from './global.js';
 
@@ -13,12 +13,16 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
+  
+  // Fixes constant warning about passing an inline function as the component to a Screen
+  const NullScreen = () => null;
+
   return (
     <NavigationContainer>
 
       <Stack.Navigator>
         {GLOBAL.loggedIn ? (
-          <Stack.Screen name=" " component={() => null} />
+          <Stack.Screen name=" " component={NullScreen} />
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
@@ -30,9 +34,9 @@ const App = () => {
             <Tab.Navigator {...props}>
               <Tab.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
               <Tab.Screen
-                name="Account Container"
-                component={AccountContainer}
-                options={{ headerShown: false }}
+                name="Profile Container"
+                component={ProfileContainer}
+                options={{ title: 'Profile', headerShown: false }}
               />
             </Tab.Navigator>
           )}
