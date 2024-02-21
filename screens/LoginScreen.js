@@ -1,37 +1,78 @@
-import { Alert, Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { useEffect, useState } from 'react';
-import { doc, setDoc, addDoc, collection } from 'firebase/firestore';
+import { Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, collection } from 'firebase/firestore';
 
 import Textbox from './components/Textbox.js'
 import GLOBAL from '../global.js';
-import db from '../firebaseConfig.js';
+import { db, auth } from '../firebaseConfig.js';
 
 const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [usernameEmail, setUsernameEmail] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const errorMessage = "Username/email or password is incorrect";
 
+  useEffect(() => {
+    if (email != '') {
+      console.log('Email State Updated: ', email);
+      login();
+    }
+  }, [email]);
 
-  const login = async () => {
+  const loginInfo = async () => {
     GLOBAL.loggedIn = true;
+    setError('');
 
-    console.log('Username/Email: ', usernameEmail);
-    console.log('Password: ', password);
-
-    // BUG: User can press the login button multiple times before the app switches to the map,
-    //      resulting in multiple database accesses
-
-    try {
-      console.log("Adding...");
-      const docRef = await addDoc(collection(db, "test"), {
-        usernameEmail: usernameEmail,
-        password: password
-      }).catch(e => console.error(e));
-      Alert.alert("Doc written with ID: ", docRef.id);
-    } catch (e) {
-      Alert.alert("Error adding document, ", e);
+    if (usernameEmail === '' || password === '') {
+      console.log('Error: All fields must be filled out');
+      setError('All fields must be filled out');
+      return;
     }
 
-    navigation.navigate('Home', { screen: 'Home' });
+    const emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (!usernameEmail.match(emailFormat)) {
+      await getDoc(doc(db, "users", usernameEmail))
+        .then((doc) => {
+          if (doc.exists()) {
+            console.log(doc.data());
+            setEmail(doc.data().email);
+            return;
+          } else {
+            console.log("Error: no user found for username/email");
+            setError(errorMessage);
+            return;
+          }
+        })
+        .catch((error) => {
+          console.log('Error:', error);
+          setError(errorMessage);
+          return;
+        }
+      );
+    } else {
+      setEmail(usernameEmail);
+    }
+  }
+
+  const login = async () => {
+    if (error == '') {
+      console.log('Email:', email);
+      console.log('Password: ', password);
+      await signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed in
+          console.log('User logged in:', userCredential.user.uid);
+          navigation.navigate('Home', { screen: 'Home' });
+          // const user = firebase.auth().currentUser;
+        })
+        .catch((error) => {
+          console.log('Error:', error.message);
+          setError(errorMessage);
+        }
+      );
+    }
   }
 
   return (
@@ -41,6 +82,7 @@ const LoginScreen = ({ navigation }) => {
           <Image className="object-scale-down h-48 w-48"
             source={require('../assets/logo.png/')}
           />
+          <Text className="text-primary w-2/3 text-center">{error}</Text>
           <Textbox
             state={usernameEmail}
             setState={setUsernameEmail}
@@ -56,7 +98,7 @@ const LoginScreen = ({ navigation }) => {
           />
           <Pressable
             className="bg-primary w-1/2 rounded-xl py-5 mt-3"
-            onPress={() => login()}
+            onPress={() => {setError(''); loginInfo()}}
           >
             <Text className="text-white font-bold text-center text-lg">LOGIN</Text>
           </Pressable>

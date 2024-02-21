@@ -1,28 +1,94 @@
 import { Text, View, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
 import { useState } from 'react';
-import Textbox from './components/Textbox.js'
-// https://icons.expo.fyi/Index
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 
+
+import Textbox from './components/Textbox.js'
 import GLOBAL from '../global.js';
+import { db, auth } from '../firebaseConfig.js';
 
 const SignupScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [retypedPassword, setRetypePassword] = useState('');
+  const [error, setError] = useState('');
 
-
-  function signup() {
+  const signup = async () => {
     GLOBAL.loggedIn = true;
+
+    // check all fields are filled out and passwords match
+    if (username === '' || email === '' || password === '' || retypedPassword === '') {
+      console.log('Error: All fields must be filled out');
+      setError('All fields must be filled out');
+      return;
+    }
+
+    if (password !== retypedPassword) {
+      console.log('Error: Passwords do not match');
+      setError('Passwords do not match');
+      return;
+    }
 
     console.log('Username:', username);
     console.log('Email:', email);
     console.log('Password:', password);
     console.log('Retyped Password:', retypedPassword);
 
-    navigation.navigate('Home', { screen: 'Home' });
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        console.log('User signed up:', user.uid);
+
+        updateProfile(user, {
+          displayName: username
+        }).then(() => {
+          // Profile updated
+          console.log('Profile updated:', auth.currentUser.displayName);
+        }).catch((error) => {
+          console.log('Error:', error);
+          setError(error.message);
+          user.delete();
+          return;
+        });
+
+        try {
+          const docRef = setDoc(doc(db, "users", username), {
+            email: email,
+            username: username,
+            uid: user.uid
+          });
+          console.log("Doc written with ID: ", docRef.id);
+
+        } catch(error) {
+          console.error('Error:', error);
+          setError(error.message);
+          user.delete();
+          return;
+        };
+
+        navigation.navigate('Home', { screen: 'Home' });
+      })
+      .catch((error) => {
+        console.log('Error:', error.message);
+        const errorMessage = error.message.split('auth/')[1].split(')')[0];
+        var message;
+        if (errorMessage == 'weak-password') {
+          message = "Password should be at least 6 characters";
+        } else if (errorMessage == 'invalid-email') {
+          message = "Invalid email";
+        } else if (errorMessage == 'email-already-in-use') {
+          message = "Email already in use";
+        } else {
+          message = error.message;
+        }
+        setError(message);
+      });
   }
+
 
   return (
     <View className="flex-1 h-screen bg-white">
@@ -34,6 +100,7 @@ const SignupScreen = ({ navigation }) => {
             </Pressable>
             <Text className="text-3xl font-bold mb-20 text-left text-primary">Create Account</Text>
           </View>
+          <Text className="text-primary w-2/3 text-center">{error}</Text>
           <Textbox
             placeholder="Username"
             secureTextEntry={false}
