@@ -37,9 +37,11 @@ const EditPasswordScreen = ({navigation}) => {
     );
   })
 
+  // Try to update the user's password with the new password
   const checkPasswords = (newPassword, reEnter) => {
 
     var success = false;
+    var message;
     // check if the new passwords match
     if (newPassword != reEnter) {
       setError("Passwords don't match!");
@@ -52,45 +54,44 @@ const EditPasswordScreen = ({navigation}) => {
       navigation.navigate('Profile');
       success = true;
     }).catch(async (error) => {
-      var message;
+      // handle errors
       if (error.code == 'auth/weak-password') {
         message = "Password should be at least 6 characters";
         console.log(message);
-        setError(message);
       } else if (error.code == 'auth/requires-recent-login') {
-        //user most likely needs to be reauthenticated
+        // user needs to be reauthenticated
 
-        console.log(error.message);
-        
-        
-        console.log("hello bob")
+        //console.log(error.message);
         var password = await promptUserForPassword();
-        console.log("password:");
-        console.log(password);
+        //console.log("password:");
+        //console.log(password);
         const credential = EmailAuthProvider.credential(user.email, password);
-        console.log("after-credential");
+        //console.log("after-credential");
         await reauthenticateWithCredential(user, credential).then(() => {
-          console.log("logged in")
+          //console.log("logged in")
+          
+          // everything works except maybe this updatePassword() call
           updatePassword(user, newPassword).then(() => {
             success = true;
           }).catch((error) => {
-            setError(error.message);
+            message = error.message;
             return;
           });
+
         }).catch((error) => {
-          console.log(error.message);
+          //console.log(error.message);
           message = error.message;
         }).finally(() => {
-          console.log("end of func");
+          //console.log("end of func");
         })
       } else {
-        console.log(error.message);
-        setError(error.message);
+        //console.log(error.message);
+        message = error.message;
       }
       //console.log("ending");
     }).finally(() => {
       //console.log("done");
-      //setError(message);
+      setError(message);
       //console.log("error set");
       if (success) {
         Alert.alert('Password Updated!');
