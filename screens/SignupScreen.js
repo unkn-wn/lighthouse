@@ -17,7 +17,6 @@ const SignupScreen = ({ navigation }) => {
   const [error, setError] = useState('');
 
   const signup = async () => {
-    GLOBAL.loggedIn = true;
 
     // check all fields are filled out and passwords match
     if (username === '' || email === '' || password === '' || retypedPassword === '') {
@@ -70,6 +69,7 @@ const SignupScreen = ({ navigation }) => {
           return;
         };
 
+        GLOBAL.loggedIn = true;
         navigation.navigate('Home', { screen: 'Home' });
       })
       .catch((error) => {
