@@ -4,7 +4,7 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
 import { db } from '../firebaseConfig.js';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
@@ -180,11 +180,23 @@ const ProfileScreen = ({ navigation }) => {
   const [permitType, setPermitType] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
 
+  useEffect(() => {
+    if (permitType != null) {
+      setPermitTypeDatabase();
+    }
+  }, [permitType]);
+
+  useEffect(() => {
+    if (vehicleType != null) {
+      setVehicleTypeDatabase();
+    }
+  }, [vehicleType]);
+
   const getUserData = async (username) => {
     await getDoc(doc(db, "users", username))
       .then((doc) => {
         if (doc.exists()) {
-          console.log(doc.data());
+          // console.log(doc.data());
           if (doc.data().permitType != '') {
             // console.log('setting permit type');
             setPermitType(doc.data().permitType);
@@ -200,6 +212,26 @@ const ProfileScreen = ({ navigation }) => {
         return;
       }
       );
+  }
+
+  const setPermitTypeDatabase = async () => {
+    await updateDoc(doc(db, "users", username), {
+      permitType: permitType.value
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+      return;
+    });
+  }
+
+  const setVehicleTypeDatabase = async () => {
+    await updateDoc(doc(db, "users", username), {
+      vehicleType: vehicleType.value
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+      return;
+    });
   }
 
   getUserData(username);
