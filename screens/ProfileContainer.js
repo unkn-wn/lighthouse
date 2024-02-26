@@ -1,14 +1,18 @@
 import React from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, TextInput, View, Button, Alert } from 'react-native';
+import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { AntDesign } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
 
-import Textbox from './components/Textbox.js'
+import Textbox from './components/Textbox.js';
+import DropdownMenu from './components/DropdownMenu.js';
+import { Dropdown } from 'react-native-element-dropdown';
+// import { Press } from 'hammerjs';
 
 const Stack = createStackNavigator();
 
-const EditPasswordScreen = ({navigation}) => {
+const EditPasswordScreen = ({ navigation }) => {
 
   // Function to prompt the user for their password using an Alert
   // Used if re-authentication is needed
@@ -69,7 +73,7 @@ const EditPasswordScreen = ({navigation}) => {
         //console.log("after-credential");
         await reauthenticateWithCredential(user, credential).then(() => {
           //console.log("logged in")
-          
+
           // everything works except maybe this updatePassword() call
           updatePassword(user, newPassword).then(() => {
             success = true;
@@ -101,7 +105,7 @@ const EditPasswordScreen = ({navigation}) => {
     //console.log('quite');
   }
 
-    
+
 
   const [newPassword, onChangeNew] = useState('');
   const [reEnterPassword, onChangeRe] = useState('');
@@ -110,35 +114,42 @@ const EditPasswordScreen = ({navigation}) => {
   // NOTE: disabled function for the button causes delay when entering text input
   return (
     <View className="flex-1 h-screen bg-white">
-      <View className="flex-1 items-center mt-20">
-        <Text className="text-primary w-2/3 text-center">{error}</Text>
-        <Textbox
-          state={newPassword}
-          setState={onChangeNew}
-          placeholder="Enter new password"
-          secureTextEntry={true}
-        />
-        <Textbox
-          state={reEnterPassword}
-          setState={onChangeRe}
-          placeholder="Re-enter new password"
-          secureTextEntry={true}
-        />
-        <Pressable
-          className={!Boolean(newPassword && reEnterPassword) ?
-                      "bg-disabled w-1/2 rounded-xl py-5 mt-3" : "bg-primary w-1/2 rounded-xl py-5 mt-3"}
-          disabled={!Boolean(newPassword && reEnterPassword)}
-          onPress={() => checkPasswords(newPassword, reEnterPassword)}
-        >
-          <Text className="text-white font-bold text-center text-lg">DONE</Text>
-        </Pressable>
-      </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View className="flex-1 items-center mt-20">
+          <View className='flex flex-row w-3/4'>
+            <Pressable onPress={() => navigation.navigate('Profile')} className="pt-1.5 mr-2">
+              <AntDesign name="caretleft" size={24} style={{ color: '#fe575f' }} />
+            </Pressable>
+            <Text className="text-3xl font-bold mb-4 text-left text-primary">Change Password</Text>
+          </View>
+          <Text className="text-primary w-2/3 text-center">{error}</Text>
+          <Textbox
+            state={newPassword}
+            setState={onChangeNew}
+            placeholder="Enter new password"
+            secureTextEntry={true}
+          />
+          <Textbox
+            state={reEnterPassword}
+            setState={onChangeRe}
+            placeholder="Re-enter new password"
+            secureTextEntry={true}
+          />
+          <Pressable
+            className={!Boolean(newPassword && reEnterPassword) ?
+              "bg-disabled w-1/2 rounded-xl py-5 mt-3" : "bg-primary w-1/2 rounded-xl py-5 mt-3"}
+            disabled={!Boolean(newPassword && reEnterPassword)}
+            onPress={() => checkPasswords(newPassword, reEnterPassword)}
+          >
+            <Text className="text-white font-bold text-center text-lg">DONE</Text>
+          </Pressable>
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   )
 }
 
-const ProfileScreen = ({navigation}) => {
-  
+const ProfileScreen = ({ navigation }) => {
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -149,17 +160,66 @@ const ProfileScreen = ({navigation}) => {
     email = user.email;
   }
 
+  const listPermits = [
+    { label: 'None', value: 'None' },
+    { label: 'A', value: 'A' },
+    { label: 'B', value: 'B' },
+    { label: 'C', value: 'C' },
+    { label: 'CG', value: 'CG' },
+    { label: 'ID', value: 'ID' },
+  ];
+
+  const listVehicles = [
+    { label: 'None', value: 'None' },
+    { label: 'Electric', value: 'Electric' },
+    { label: 'Compact', value: 'Compact' },
+    { label: 'Handicap', value: 'Handicap' },
+  ];
+
+  const [permitType, setPermitType] = useState(null);
+  const [vehicleType, setVehicleType] = useState(null);
+
   return (
-    <View style={styles.container}>
-      <Text>These are your account details!</Text>
-      <Text>Username: {username}</Text>
-      <Text>Email: {email}</Text>
-      <Button
-        title="Change Password"
-        onPress = {() =>
-          navigation.navigate('Change Password')
-        }
-      />
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 mt-12">
+        <View className="items-center">
+          <Image className="object-scale-down h-32 w-32"
+            source={require('../assets/logo.png/')}
+          />
+        </View>
+        <View className="my-8 mx-10 items-center">
+          <Text className="text-primary font-bold text-3xl">Profile</Text>
+          <Textbox
+            value={username}
+            editable={false}
+          />
+          <Textbox
+            value={email}
+            editable={false}
+          />
+          <DropdownMenu
+            placeholder="Permit Type"
+            data={listPermits}
+            state={permitType}
+            setState={setPermitType}
+            onChange={item => {
+              setPermitType(item.value);
+            }}
+          />
+          <DropdownMenu
+            placeholder="Vehicle Type"
+            data={listVehicles}
+            state={vehicleType}
+            setState={setVehicleType}
+            onChange={item => {
+              setVehicleType(item.value);
+            }}
+          />
+          <Pressable onPress={() => navigation.navigate('Change Password')}>
+            <Text className="mt-4 text-primary font-bold">Change Password</Text>
+          </Pressable>
+        </View>
+      </View>
     </View>
   )
 }
@@ -168,24 +228,9 @@ const ProfileContainer = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Change Password" component={EditPasswordScreen} />
+      <Stack.Screen name="Change Password" component={EditPasswordScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-  },
-});
 
 export default ProfileContainer;
