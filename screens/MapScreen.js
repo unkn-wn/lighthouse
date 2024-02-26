@@ -1,9 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View, Button, Linking, AppState, Modal } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 
 import * as Location from 'expo-location';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 // https://github.com/react-native-maps/react-native-maps/blob/HEAD/docs/mapview.md
 // https://www.npmjs.com/package/react-native-maps
 
@@ -14,6 +18,23 @@ const MapScreen = ({ navigation }) => {
   const [locationRunning, setLocationRunning] = useState(false);
   const [location, setLocation] = useState({ "coords": { "latitude": 40.426170, "longitude": -86.920284, "accuracy": 0, "altitude": 0, "heading": 0, "speed": 0, "altitudeAccuracy": 0 }, "timestamp": 0 });
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Bottom Sheet variables and stuff
+  const bottomSheetModalRef = useRef(null);
+  const snapPoints = useMemo(() => ['20%', '40%'], []);
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current.present();
+  }, []);
+  const handleSheetChanges = useCallback((index) => {
+    console.log('handleSheetChanges', index);
+    this.map.animateToRegion({
+      latitude: 42.5,
+      longitude: 15.2,
+      latitudeDelta: 7.5,
+      longitudeDelta: 7.5,
+    }, 1000);
+  }, []);
+
 
   // This useEffect is for checking if app is focused or not
   useEffect(() => {
@@ -80,56 +101,69 @@ const MapScreen = ({ navigation }) => {
 
 
   return (
-    <View className="flex-1 bg-white items-center justify-center">
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white w-5/6 p-4 rounded-lg">
-            <Text>Permission to access location was denied. Lighthouse requires your location to find the closest parking options near you. Open settings?</Text>
-            {/* Ok and Cancel buttons */}
-            <View className="flex-row justify-around mt-2">
-              <Button title="No" onPress={() => setModalVisible(false)} />
-              <Button title="Yes" onPress={() => { Linking.openSettings(); setModalVisible(false) }} />
+    <BottomSheetModalProvider>
+      <View className="flex-1 bg-white items-center justify-center">
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white w-5/6 p-4 rounded-lg">
+              <Text>Permission to access location was denied. Lighthouse requires your location to find the closest parking options near you. Open settings?</Text>
+              {/* Ok and Cancel buttons */}
+              <View className="flex-row justify-around mt-2">
+                <Button title="No" onPress={() => setModalVisible(false)} />
+                <Button title="Yes" onPress={() => { Linking.openSettings(); setModalVisible(false) }} />
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-      <MapView
-        className="w-full h-full"
-        provider='google' // 'google' for google maps
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-        showsCompass={true}
-        region={{
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.02,
-        }}
-        onMarkerPress={(e) => {
-          console.log(e.nativeEvent);
-        }}
-      >
-        <Marker
-          coordinate={{
+        <MapView
+          ref={(ref) => { this.map = ref; }}
+          className="w-full h-full"
+          provider='google' // 'google' for google maps
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+          showsCompass={true}
+          region={{
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.02,
           }}
-          title="You are here"
-          description="This is your current location"
+          onMarkerPress={(e) => {
+            console.log(e.nativeEvent);
+          }}
         >
+          <Marker
+            coordinate={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            }}
+            title="You are here"
+            description="This is your current location"
+            onPress={handlePresentModalPress}
+          />
 
-        </Marker>
-      </MapView>
-      <StatusBar style="auto" />
-    </View>
+        </MapView>
+        <BottomSheetModal
+          ref={bottomSheetModalRef}
+          index={1}
+          snapPoints={snapPoints}
+          onChange={handleSheetChanges}
+        >
+          <View className="flex-1 bg-white items-center justify-center">
+            <Text>Bottom Sheet Content</Text>
+          </View>
+        </BottomSheetModal>
+        <StatusBar style="auto" />
+      </View>
+    </BottomSheetModalProvider>
   );
 }
 
