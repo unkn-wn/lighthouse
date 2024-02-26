@@ -1,32 +1,38 @@
-const puppeteer = require('puppeteer');
-
-const searchTerms = [
-  "Purdue University parking",
-  "street parking West Lafayette IN",
-  // Add more as needed
-];
+require('dotenv').config();
+let fetch;
 
 (async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  for (const term of searchTerms) {
-    // Navigate to a search engine or directly to known sources if you have URLs
-    await page.goto(`https://www.google.com/search?q=${encodeURIComponent(term)}`);
-
-    const links = await page.evaluate(() => Array.from(document.querySelectorAll('h3 > a')).map(link => link.href));
-
-    for (const link of links) {
-      await page.goto(link);
-      // Scrape the parking info from the page
-      // Use appropriate selectors for the data you need
-      const data = await page.evaluate(() => {
-        return document.querySelector('h1').innerText;
-      });
-
-      console.log(data); // Output the scraped data
-    }
-  }
-
-  await browser.close();
+  const nodeFetch = await import('node-fetch');
+  fetch = nodeFetch.default;
 })();
+const apiKey = process.env.mapsApiKey;
+const query = encodeURIComponent('parking near Purdue University');
+const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
+
+async function searchParking() {
+  try {
+    const { default: fetch } = await import('node-fetch'); // Import fetch directly where it's used
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.results; // Contains array of places matching the search query
+  } catch (error) {
+    console.error('Error fetching parking data:', error);
+    return [];
+  }
+}
+
+async function processParkingOptions() {
+  const parkingOptions = await searchParking();
+  for (const option of parkingOptions) {
+    console.log('Parking Option:', option.name);
+    console.log('Address:', option.formatted_address);
+    if (option.website) {
+      console.log('Website:', option.website);
+    } else {
+      console.log('No website available');
+    }
+    // Here, you could add logic to visit the website using Puppeteer if a URL is available
+  }
+}
+
+processParkingOptions();
