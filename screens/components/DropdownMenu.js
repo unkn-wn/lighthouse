@@ -16,7 +16,7 @@ const DropdownMenu = (props) => {
       labelField="label"
       valueField="value"
       placeholder={props.placeholder}
-      value={props.placeholder + ": " + props.state}
+      value={props.state}
       onChange={props.setState}
       {...props.state}
     />

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
-import { useState } from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { AntDesign } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
+import { AntDesign } from '@expo/vector-icons';
+import { db } from '../firebaseConfig.js';
+import { doc, getDoc } from 'firebase/firestore';
 
 import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
@@ -178,6 +179,30 @@ const ProfileScreen = ({ navigation }) => {
 
   const [permitType, setPermitType] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
+
+  const getUserData = async (username) => {
+    await getDoc(doc(db, "users", username))
+      .then((doc) => {
+        if (doc.exists()) {
+          console.log(doc.data());
+          if (doc.data().permitType != '') {
+            // console.log('setting permit type');
+            setPermitType(doc.data().permitType);
+          }
+          if (doc.data().vehicleType != '') {
+            // console.log('setting vehicle type');
+            setVehicleType(doc.data().vehicleType);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      }
+      );
+  }
+
+  getUserData(username);
 
   return (
     <View className="flex-1 h-screen bg-white">
