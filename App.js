@@ -6,7 +6,7 @@ import LoginScreen from './screens/LoginScreen.js';
 import SignupScreen from './screens/SignupScreen.js';
 import MapScreen from './screens/MapScreen.js'
 import ProfileContainer from './screens/ProfileContainer.js'
-import ListScreen from './screens/ListScreen.js'
+import ListContainer from './screens/ListContainer.js'
 
 import GLOBAL from './global.js';
 
@@ -34,7 +34,11 @@ const App = () => {
           {props => (
             <Tab.Navigator {...props}>
               <Tab.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
-              <Tab.Screen name="List" component={ListScreen} />
+              <Tab.Screen
+                name="List Container"
+                component={ListContainer}
+                options={{ title: 'List', headerShown: false }}
+              />
               <Tab.Screen
                 name="Profile Container"
                 component={ProfileContainer}
@@ -44,7 +48,6 @@ const App = () => {
           )}
         </Stack.Screen>
       </Stack.Navigator>
-
 
     </NavigationContainer>
   );
