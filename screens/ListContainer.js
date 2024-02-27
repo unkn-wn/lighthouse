@@ -33,8 +33,8 @@ const ListScreen = ({navigation}) => {
   }
 
   const Item = ({item, onPress}) => (
-    <Pressable onPress={onPress}>
-      <Text>{item.get('name')}</Text>
+    <Pressable onPress={onPress} className="bg-white mx-8 my-2 py-4 shadow-md rounded-md">
+      <Text className="text-lg text-gray-800 mx-8">{item.get('name')}</Text>
     </Pressable>
   );
 
@@ -58,11 +58,15 @@ const ListScreen = ({navigation}) => {
 
   return (
     <View className="flex-1 h-screen bg-white">
-      <View className="flex-1 items-center mt-20">
+      <View className="flex-1 max-h-40 items-center bg-primary">
+        <Text className="text-white font-bold text-3xl mt-10 pt-5">Parking Spots</Text>
+      </View>
+      <View className="flex-1 items-center -mt-10">
         <FlatList
-          className="text-3xl"
+          className="w-full divide-y divide-solid divide-black"
           data={DATA}
           renderItem={renderItem}
+          itemSeparatorComponent={<View className="h-0.5 bg-black" />}
           keyExtractor={item => item.id}
         />  
       </View>
