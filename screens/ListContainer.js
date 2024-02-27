@@ -8,18 +8,27 @@ const Stack = createStackNavigator();
 
 const ParkingInfoScreen = ({route, navigation}) => {
 
+  const { item } = route.params;
+
+  return (
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 items-center mt-20">
+        <Text>Name: {item.get('name')}</Text>
+        <Text>Address: {item.get('address')}</Text>
+        <Text>Allowed Permit: {item.get('restrictedPermit')}</Text>
+      </View>
+    </View>
+  )
+
 }
 
 const ListScreen = ({navigation}) => {
 
-  console.log("helloi");
   const getParkingData = async () => {
-    console.log("inside")
     const querySnapshot = await getDocs(collection(db, "parking")).catch((error) => {
       console.log(error);
     });
-    console.log("got_data");
-    console.log(querySnapshot.docs);
+    //console.log(querySnapshot.docs);
     setDATA(querySnapshot.docs);
   }
 
@@ -34,7 +43,7 @@ const ListScreen = ({navigation}) => {
       <Item
         item={item}
         onPress={() => {
-          navigation.navigate('ParkingInfo', {
+          navigation.navigate('Parking Information', {
             item: item,
           });
         }}
@@ -48,14 +57,16 @@ const ListScreen = ({navigation}) => {
   }, [])
 
   return (
-    <SafeAreaView classname="flex-1 h-screen bg-black">
-      <FlatList
-
-        data={DATA}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-      />  
-    </SafeAreaView>
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 items-center mt-20">
+        <FlatList
+          className="text-3xl"
+          data={DATA}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+        />  
+      </View>
+    </View>
   )
 }
 
@@ -64,7 +75,7 @@ const ListContainer = () => {
     return (
         <Stack.Navigator>
             <Stack.Screen name="List" component={ListScreen} options={{headerShown: false}} />
-            <Stack.Screen name="ParkingInfo" component={ParkingInfoScreen} />
+            <Stack.Screen name="Parking Information" component={ParkingInfoScreen} />
         </Stack.Navigator>
     )
 }
