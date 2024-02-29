@@ -1,4 +1,4 @@
-import { Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback, Modal } from 'react-native';
+import { Alert, Text, View, Pressable, Image, Button, Keyboard, TouchableWithoutFeedback, Modal } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, collection } from 'firebase/firestore';
@@ -78,14 +78,22 @@ const LoginScreen = ({ navigation }) => {
 
 
   const sendForgotPass = async () => {
-    console.log('Sending password reset:', usernameEmail);
+    if (usernameEmail == "") {
+      Alert.alert("Please enter an email address");
+      return;
+    }
     await sendPasswordResetEmail(auth, usernameEmail)
       .then(() => {
         alert('Password reset email sent! If you did not receive an email, please check that you entered the correct email address and check your spam folder.');
         setForgotPasswordPrompt(false);
       })
       .catch((error) => {
-        console.log('Error:', error.message);
+        if (error.code='auth/invalid-email') {
+          Alert.alert("Invalid email");
+        }
+        else {
+          console.log('Error:', error.message);
+        }
       });
   }
 
