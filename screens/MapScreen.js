@@ -241,8 +241,6 @@ const MapScreen = ({ navigation }) => {
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                     <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
                     <Text className="text-sm mt-1 font-semibold text-secondary">1234 Address street{"\n"}West Lafayette, Indiana 27482</Text>
-                  </View>
-                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
                     <Pressable
                       onPress={() => {
                         const linkURL = "http://maps.apple.com/?daddr="
@@ -251,10 +249,14 @@ const MapScreen = ({ navigation }) => {
                         Linking.openURL(linkURL);
                       }}
                     >
-                      <View className="w-16 h-16 rounded-xl bg-primary justify-center items-center">
-                        <Image className="w-10 h-10" source={require("../assets/navigator.png")} />
-                      </View>
+                      <Text className="text-lg font-bold text-blue-500">Open In Maps</Text>
                     </Pressable>
+                  </View>
+                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
+
+                      {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
+                        <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
+                      </View> */}
                     <Text className="text-xs text-gray-500 text-center">Requires "A Permit" to park.</Text>
                   </View>
                 </View>
