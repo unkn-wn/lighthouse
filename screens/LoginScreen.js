@@ -82,10 +82,10 @@ const LoginScreen = ({ navigation }) => {
     await sendPasswordResetEmail(auth, usernameEmail)
       .then(() => {
         alert('Password reset email sent! If you did not receive an email, please check that you entered the correct email address and check your spam folder.');
+        setForgotPasswordPrompt(false);
       })
       .catch((error) => {
         console.log('Error:', error.message);
-        setError(error.message);
       });
   }
 
@@ -153,7 +153,7 @@ const LoginScreen = ({ navigation }) => {
               />
               <Pressable
                 className="bg-primary w-1/5 rounded-xl my-2"
-                onPress={() => { setForgotPasswordPrompt(false); sendForgotPass(); }}
+                onPress={() => { sendForgotPass(); }}
               >
                 <Text className="text-white font-bold text-center text-md my-auto">RESET</Text>
               </Pressable>

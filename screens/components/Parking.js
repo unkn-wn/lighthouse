@@ -4,4 +4,12 @@ export const PARKING = {
   STREET: 2
 };
 
-export default class Parking {};
+export function getParkingName(number) {
+  const parkingNames = Object.keys(PARKING);
+  for (let i = 0; i < parkingNames.length; i++) {
+    if (PARKING[parkingNames[i]] === number) {
+      return parkingNames[i];
+    }
+  }
+  return null;
+}
