@@ -2,7 +2,7 @@ import { Text, View, Keyboard, TouchableWithoutFeedback, Pressable } from 'react
 import { AntDesign } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
 import { useState } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 
 
 import Textbox from './components/Textbox.js'
@@ -16,6 +16,19 @@ const SignupScreen = ({ navigation }) => {
   const [retypedPassword, setRetypePassword] = useState('');
   const [error, setError] = useState('');
 
+  async function checkDuplicateUsername() {
+    const querySnapshot = await getDocs(collection(db, "users")).catch((error) => {
+      console.log(error);
+    });
+    const data = querySnapshot.docs.map(doc => doc.data().username);
+    for (let usern of data) {
+      if (usern === username) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const signup = async () => {
 
     // check all fields are filled out and passwords match
@@ -28,6 +41,12 @@ const SignupScreen = ({ navigation }) => {
     if (password !== retypedPassword) {
       console.log('Error: Passwords do not match');
       setError('Passwords do not match');
+      return;
+    }
+
+    if (await checkDuplicateUsername()) {
+      console.log('Error: Username already in use');
+      setError('Username already in use');
       return;
     }
 
@@ -55,14 +74,14 @@ const SignupScreen = ({ navigation }) => {
         });
 
         try {
-          const docRef = setDoc(doc(db, "users", email), {
+          const docRef = setDoc(doc(db, "users", username), {
             email: email,
             username: username,
             uid: user.uid
           });
           console.log("Doc written with ID: ", docRef.id);
 
-        } catch(error) {
+        } catch (error) {
           console.error('Error:', error);
           setError(error.message);
           user.delete();

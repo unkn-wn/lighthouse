@@ -13,9 +13,11 @@ import { doc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 
 import * as Location from 'expo-location';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import { Marker, Callout } from 'react-native-maps';
 // https://github.com/react-native-maps/react-native-maps/blob/HEAD/docs/mapview.md
 // https://www.npmjs.com/package/react-native-maps
+import MapView from "react-native-map-clustering";
+// https://github.com/venits/react-native-map-clustering
 
 
 const MapScreen = ({ navigation }) => {

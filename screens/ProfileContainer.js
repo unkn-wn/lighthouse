@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
@@ -179,6 +179,8 @@ const ProfileScreen = ({ navigation }) => {
 
   const [permitType, setPermitType] = useState(null);
   const [vehicleType, setVehicleType] = useState(null);
+  const [editUsername, setEditUsername] = useState(false);
+  const [usernameChange, setUsernameChange] = useState(username);
 
   useEffect(() => {
     if (permitType != null) {
@@ -191,6 +193,13 @@ const ProfileScreen = ({ navigation }) => {
       setVehicleTypeDatabase();
     }
   }, [vehicleType]);
+
+  useEffect(() => {
+    if (!editUsername && username != usernameChange) {
+      console.log('Changing username from', username, 'to', usernameChange);
+      setUsernameDatabase();
+    }
+  }, [editUsername]);
 
   const getUserData = async (username) => {
     await getDoc(doc(db, "users", username))
@@ -218,65 +227,92 @@ const ProfileScreen = ({ navigation }) => {
     await updateDoc(doc(db, "users", username), {
       permitType: permitType.value
     })
-    .catch((error) => {
-      console.log('Error:', error);
-      return;
-    });
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
   }
 
   const setVehicleTypeDatabase = async () => {
     await updateDoc(doc(db, "users", username), {
       vehicleType: vehicleType.value
     })
-    .catch((error) => {
-      console.log('Error:', error);
-      return;
-    });
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
+  }
+
+  const setUsernameDatabase = async () => {
+    await updateDoc(doc(db, "users", username), {
+      username: usernameChange
+    })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
+    console.log('Changed username to', usernameChange)
   }
 
   getUserData(username);
 
   return (
     <View className="flex-1 h-screen bg-white">
-      <View className="flex-1 mt-12">
-        <View className="items-center">
-          <Image className="object-scale-down h-32 w-32"
-            source={require('../assets/logo.png/')}
-          />
+      <TouchableWithoutFeedback accessible={false} onPress={() => {
+        Keyboard.dismiss;
+        setEditUsername(false);
+      }}
+      >
+        <View className="flex-1 mt-12">
+          <View className="items-center">
+            <Image className="object-scale-down h-32 w-32"
+              source={require('../assets/logo.png/')}
+            />
+          </View>
+          <View className="my-8 mx-10 items-center">
+            <Text className="text-primary font-bold text-3xl">Profile</Text>
+            <Textbox
+              value={usernameChange}
+              state={usernameChange}
+              setState={setUsernameChange}
+              editable={editUsername}
+              onSubmitEditing={() => {
+                setEditUsername(false);
+              }}
+            />
+            <Textbox
+              value={email}
+              editable={false}
+            />
+            <DropdownMenu
+              placeholder="Permit Type"
+              data={listPermits}
+              state={permitType}
+              setState={setPermitType}
+              onChange={item => {
+                setPermitType(item.value);
+              }}
+            />
+            <DropdownMenu
+              placeholder="Vehicle Type"
+              data={listVehicles}
+              state={vehicleType}
+              setState={setVehicleType}
+              onChange={item => {
+                setVehicleType(item.value);
+              }}
+            />
+            <Pressable onPress={() => {
+              setEditUsername(true);
+            }}>
+              <Text className="mt-4 text-primary font-bold">Change Username</Text>
+            </Pressable>
+            <Pressable onPress={() => navigation.navigate('Change Password')}>
+              <Text className="mt-4 text-primary font-bold">Change Password</Text>
+            </Pressable>
+          </View>
         </View>
-        <View className="my-8 mx-10 items-center">
-          <Text className="text-primary font-bold text-3xl">Profile</Text>
-          <Textbox
-            value={username}
-            editable={false}
-          />
-          <Textbox
-            value={email}
-            editable={false}
-          />
-          <DropdownMenu
-            placeholder="Permit Type"
-            data={listPermits}
-            state={permitType}
-            setState={setPermitType}
-            onChange={item => {
-              setPermitType(item.value);
-            }}
-          />
-          <DropdownMenu
-            placeholder="Vehicle Type"
-            data={listVehicles}
-            state={vehicleType}
-            setState={setVehicleType}
-            onChange={item => {
-              setVehicleType(item.value);
-            }}
-          />
-          <Pressable onPress={() => navigation.navigate('Change Password')}>
-            <Text className="mt-4 text-primary font-bold">Change Password</Text>
-          </Pressable>
-        </View>
-      </View>
+      </TouchableWithoutFeedback>
     </View>
   )
 }
