@@ -70,7 +70,7 @@ const MapScreen = ({ navigation }) => {
       }
 
       setMarkers(parkingData);
-      console.log(parkingData[0]);
+      // console.log(parkingData[0]);
     }
     getParkingData();
   }, []);
