@@ -24,6 +24,7 @@ const LoginScreen = ({ navigation }) => {
 
   const loginInfo = async () => {
     setError('');
+    setEmail('');
 
     if (usernameEmail === '' || password === '') {
       console.log('Error: All fields must be filled out');
