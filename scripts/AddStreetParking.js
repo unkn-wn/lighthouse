@@ -12,8 +12,7 @@ const AddStreetParking = () => {
     const longitude = -86.910602;
     const street = "Young Hall";
     const parking = PARKING.LOT;
-    const clarification = "";
-
+    const type = "Street Parking";
     const dayData = {
       cost: [],
       endTime: -1,
@@ -21,6 +20,7 @@ const AddStreetParking = () => {
       startTime: -1,
     }
 
+    // check to make sure all data fields are accurate before adding to database
     const data = {
       address: "",
       alwaysFree: false,
@@ -35,7 +35,7 @@ const AddStreetParking = () => {
         saturday: dayData,
         sunday: dayData,
       },
-      name: street + ((parking == 2) ? " Street Parking" : " Metered Parking Lot") + clarification,
+      name: street + " " + type,
       parkingType: parking,
     };
 
