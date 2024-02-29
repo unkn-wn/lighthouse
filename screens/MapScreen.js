@@ -191,7 +191,7 @@ const MapScreen = ({ navigation }) => {
           </View>
         </Modal>
 
-        {!wait && <>
+        {!wait && locationRunning && <>
           <MapView
             ref={mapRef}
             className="w-full h-full"
