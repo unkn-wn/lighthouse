@@ -33,10 +33,13 @@ async function searchParking() {
 
 // Get detailed information about a place
 async function getPlaceDetails(placeId) {
-  const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,website&key=${apiKey}`;
+  const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,website,geometry&key=${apiKey}`;
   try {
     const data = await fetchJson(detailsUrl);
-    return data.result; // Contains detailed information about the place
+    return {
+      ...data.result, // Spread operator to include existing detail fields
+      coordinates: data.result.geometry.location // Add coordinates field
+    }; // Contains detailed information about the place including coordinates
   } catch (error) {
     console.error(`Error fetching details for place ID ${placeId}:`, error);
     return null;
@@ -85,17 +88,19 @@ async function processParkingOptions() {
   for (const option of parkingOptions) {
     console.log('Fetching details for:', option.name);
     const details = await getPlaceDetails(option.place_id);
+    console.log('Coordinates:', details.coordinates);
     if (details && details.website) {
       console.log('Parking Option:', details.name);
       console.log('Address:', details.formatted_address);
       console.log('Website:', details.website);
       const websiteText = await scrapeWebsite(details.website);
       console.log('Scraped Website Text:', websiteText);
+
       try {
         const response = await openai.chat.completions.create({
           model: "gpt-3.5-turbo-0125",
           messages: [
-            { role: "system", content: "You are a helpful assistant designed to output JSON. You will parse the website text and output a JSON object with the following keys: 'name', 'address', 'start hours for every day', 'end hours for every day', 'free parking or not', 'cost depending on hours spent parking', 'permit type or types needed'." },
+            { role: "system", content: "You are a helpful assistant designed to output JSON. You will parse the website text and output a JSON object with the following keys: 'start hours for every day', 'end hours for every day', 'free parking or not', 'cost depending on hours spent parking', 'permit type or types needed'." },
             { role: "user", content: websiteText }
           ],
         });

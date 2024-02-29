@@ -21,6 +21,7 @@ import MapView from "react-native-map-clustering";
 
 
 const MapScreen = ({ navigation }) => {
+  const mapRef = useRef(null);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const [locationRunning, setLocationRunning] = useState(false);
@@ -152,7 +153,7 @@ const MapScreen = ({ navigation }) => {
   const handleMarkerPress = (marker, index) => {
     handlePresentModalPress();
     setCurIndex(index);
-    this.map.animateToRegion({
+    mapRef.current.animateToRegion({
       latitude: marker.coords.geoPointValue.latitude - 0.001,
       longitude: marker.coords.geoPointValue.longitude,
       latitudeDelta: 0.005,
@@ -192,7 +193,7 @@ const MapScreen = ({ navigation }) => {
 
         {!wait && <>
           <MapView
-            ref={(ref) => { this.map = ref; }}
+            ref={mapRef}
             className="w-full h-full"
             provider='google' // 'google' for google maps
             showsUserLocation={true}
@@ -240,17 +241,20 @@ const MapScreen = ({ navigation }) => {
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                     <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
                     <Text className="text-sm mt-1 font-semibold text-secondary">1234 Address street{"\n"}West Lafayette, Indiana 27482</Text>
+                  </View>
+                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
                     <Pressable
                       onPress={() => {
                         const linkURL = "http://maps.apple.com/?daddr="
-                                        + markers[curIndex].coords.geoPointValue.latitude + ","
-                                        + markers[curIndex].coords.geoPointValue.longitude;
+                          + markers[curIndex].coords.geoPointValue.latitude + ","
+                          + markers[curIndex].coords.geoPointValue.longitude;
                         Linking.openURL(linkURL);
                       }}
-                    ><Text className="text-lg fond-semibold mt-1 text-blue-500">Open in Maps</Text></Pressable>
-                  </View>
-                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
-                    <Image className="w-16 h-16 border-2" />
+                    >
+                      <View className="w-16 h-16 rounded-xl bg-primary justify-center items-center">
+                        <Image className="w-10 h-10" source={require("../assets/navigator.png")} />
+                      </View>
+                    </Pressable>
                     <Text className="text-xs text-gray-500 text-center">Requires "A Permit" to park.</Text>
                   </View>
                 </View>
