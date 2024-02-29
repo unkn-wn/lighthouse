@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { SafeAreaView, Text, View, FlatList, Pressable } from 'react-native';
+import { Button, SafeAreaView, Text, View, FlatList, Pressable, Linking } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import {db } from '../firebaseConfig.js';
 import { doc, getDocs, collection } from 'firebase/firestore';
@@ -16,6 +16,15 @@ const ParkingInfoScreen = ({route, navigation}) => {
         <Text>Name: {item.get('name')}</Text>
         <Text>Address: {item.get('address')}</Text>
         <Text>Allowed Permit: {item.get('restrictedPermit')}</Text>
+        <Button
+          title="Open in Maps"
+          onPress={() => {
+            const linkURL = "http://maps.apple.com/?daddr="
+                            + item.get('coords').latitude + ","
+                            + item.get('coords').longitude;
+            Linking.openURL(linkURL);
+          }}
+        />
       </View>
     </View>
   )
