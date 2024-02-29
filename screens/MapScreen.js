@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View, Button, Linking, AppState, Modal, Image } from 'react-native';
+import { Pressable, Text, View, Button, Linking, AppState, Modal, Image } from 'react-native';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   BottomSheetModal,
@@ -234,10 +234,18 @@ const MapScreen = ({ navigation }) => {
             <BottomSheetView className="flex-1 bg-white w-full h-full p-6">
               <View className="px-4 pb-6">
                 <View className="flex-row">
-                  <View className="flex-col w-2/3">
+                  <View className="flex-col w-2/3 items-left">
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                     <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
                     <Text className="text-sm mt-1 font-semibold text-secondary">1234 Address street{"\n"}West Lafayette, Indiana 27482</Text>
+                    <Pressable
+                      onPress={() => {
+                        const linkURL = "http://maps.apple.com/?daddr="
+                                        + markers[curIndex].coords.geoPointValue.latitude + ","
+                                        + markers[curIndex].coords.geoPointValue.longitude;
+                        Linking.openURL(linkURL);
+                      }}
+                    ><Text className="text-lg fond-semibold mt-1 text-blue-500">Open in Maps</Text></Pressable>
                   </View>
                   <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
                     <Image className="w-16 h-16 border-2" />
