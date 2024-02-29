@@ -55,7 +55,7 @@ const SignupScreen = ({ navigation }) => {
         });
 
         try {
-          const docRef = setDoc(doc(db, "users", username), {
+          const docRef = setDoc(doc(db, "users", email), {
             email: email,
             username: username,
             uid: user.uid
