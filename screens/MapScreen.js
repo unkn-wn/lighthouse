@@ -5,6 +5,7 @@ import {
   BottomSheetModal,
   BottomSheetModalProvider,
   BottomSheetView,
+  BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 
 import { db } from '../firebaseConfig.js';
@@ -30,10 +31,12 @@ const MapScreen = ({ navigation }) => {
 
   const [markers, setMarkers] = useState([]);
 
+
   // Bottom Sheet variables and stuff
   const bottomSheetModalRef = useRef(null);
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current.present();
+    bottomSheetModalRef.current.expand();
   }, []);
   const handleSheetChanges = useCallback((index) => {
     // console.log('handleSheetChanges', index);
@@ -47,6 +50,11 @@ const MapScreen = ({ navigation }) => {
     }
 
   }, []);
+  const renderBackdrop = useCallback(
+    (props) => <BottomSheetBackdrop {...props} opacity={0.1} enableTouchThrough={true} />,
+    []
+  );
+  // END BOTTOM SHEET FUNCTIONS
 
   // UseEffect for getting parking data from firebase
   useEffect(() => {
@@ -73,18 +81,6 @@ const MapScreen = ({ navigation }) => {
       setWait(false);
     }
   }, [markers]);
-
-  // UseEffect for animating map to the marker location
-  useEffect(() => {
-    if (this.map) {
-      this.map.animateToRegion({
-        latitude: markers[curIndex].coords.geoPointValue.latitude - 0.001,
-        longitude: markers[curIndex].coords.geoPointValue.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      }, 500);
-    }
-  }, [curIndex]);
 
 
   // This useEffect is for checking if app is focused or not
@@ -151,6 +147,24 @@ const MapScreen = ({ navigation }) => {
   // END LOCATION STUFF
 
 
+  const handleMarkerPress = (marker, index) => {
+    handlePresentModalPress();
+    setCurIndex(index);
+    this.map.animateToRegion({
+      latitude: marker.coords.geoPointValue.latitude - 0.001,
+      longitude: marker.coords.geoPointValue.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    }, 500);
+    setMarkers((prev) => {
+      const newMarkers = [...prev];
+      newMarkers.map((marker) => marker.image = require("../assets/marker.png"));
+      newMarkers[index].image = require("../assets/marker2.png")
+      return newMarkers;
+    });
+  }
+
+
   return (
     <BottomSheetModalProvider>
       <View className="flex-1 bg-white items-center justify-center">
@@ -199,16 +213,7 @@ const MapScreen = ({ navigation }) => {
                 coordinate={marker.coords.geoPointValue}
                 title={marker.name.stringValue}
                 description={marker.desc.stringValue}
-                onPress={() => {
-                  handlePresentModalPress();
-                  setMarkers((prev) => {
-                    const newMarkers = [...prev];
-                    newMarkers[curIndex].image = require("../assets/marker.png")
-                    newMarkers[index].image = require("../assets/marker2.png")
-                    return newMarkers;
-                  });
-                  setCurIndex(index);
-                }}
+                onPress={() => handleMarkerPress(marker, index)}
                 pinColor={marker.color}
               >
                 <Image source={markers[index].image} style={{ width: 40, height: 40 }} />
@@ -224,6 +229,7 @@ const MapScreen = ({ navigation }) => {
             snapPoints={['15%']}
             enableDynamicSizing
             onChange={handleSheetChanges}
+            backdropComponent={renderBackdrop}
           >
             <BottomSheetView className="flex-1 bg-white w-full h-full p-6">
               <View className="px-4 pb-6">
