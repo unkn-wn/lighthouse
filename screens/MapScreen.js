@@ -258,7 +258,7 @@ const MapScreen = ({ route, navigation }) => {
                   <View className="flex-col w-2/3 items-left">
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                     <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
-                    <Text className="text-sm mt-1 font-semibold text-secondary">1234 Address street{"\n"}West Lafayette, Indiana 27482</Text>
+                    <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
                     <Pressable
                       onPress={() => {
                         const linkURL = "http://maps.apple.com/?daddr="
