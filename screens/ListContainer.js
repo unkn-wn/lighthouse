@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
-import { getDocs, collection } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { Button, SafeAreaView, Text, View, FlatList, Pressable, Linking } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import {db } from '../firebaseConfig.js';
+import { doc, getDocs, collection } from 'firebase/firestore';
 import * as Location from 'expo-location';
 
 const ListContainer = ({ navigation }) => {
@@ -47,6 +48,12 @@ const ListContainer = ({ navigation }) => {
     }
   };
 
+  const Item = ({item, onPress}) => (
+    <Pressable onPress={onPress} className="bg-white mx-8 my-2 py-4 shadow-md rounded-md">
+      <Text className="text-lg text-gray-800 mx-8">{item.name}</Text>
+    </Pressable>
+  );
+
   function calculateDistance(lat1, lon1, lat2, lon2) {
     var R = 6371; // Radius of the earth in km
     var dLat = deg2rad(lat2-lat1);
@@ -65,83 +72,35 @@ const ListContainer = ({ navigation }) => {
     return deg * (Math.PI/180)
   }
 
-  const renderItem = ({ item }) => (
-    <Pressable 
-      onPress={() => navigation.navigate('Map', { itemName: item.name })}
-      style={styles.item}
-    >
-      <Text style={styles.itemText}>{item.name}</Text>
-    </Pressable>
-  );
+  const renderItem = ({item}) => {
+    return (
+      <Item
+        item={item}
+        onPress={() => {
+          navigation.navigate('Map', {
+            itemName: item.name,
+          });
+        }}
+      />
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Parking Spots</Text>
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 max-h-40 items-center bg-primary">
+        <Text className="text-white font-bold text-3xl mt-10 pt-5">Parking Spots</Text>
       </View>
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      ) : (
-      <FlatList
-        data={DATA}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContentContainer}
-      />
-      )}
+      <View className="flex-1 items-center -mt-10">
+        <FlatList
+          className="w-full divide-y divide-solid divide-black"
+          data={DATA}
+          renderItem={renderItem}
+          itemSeparatorComponent={<View className="h-0.5 bg-black" />}
+          keyExtractor={item => item.id}
+        />  
+      </View>
     </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 20,
-    color: '#999',
-  },
-  header: {
-    height: 120,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    backgroundColor: '#eb6363',
-    paddingBottom: 20,
-  },
-  headerText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 24,
-  },
-  item: {
-    backgroundColor: 'white',
-    marginHorizontal: 8,
-    marginVertical: 2,
-    padding: 16,
-    shadowOpacity: 0.2,
-    borderRadius: 4,
-    // Additional styles to match your previous UI
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 1, // for Android shadow
-  },
-  itemText: {
-    fontSize: 18,
-    color: '#4a4a4a',
-  },
-  listContentContainer: {
-    flexGrow: 1,
-    // If you want spacing around the FlatList or any specific styling
-  },
-});
+  )
+}
 
 export default ListContainer;
