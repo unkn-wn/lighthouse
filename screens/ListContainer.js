@@ -4,34 +4,34 @@ import { createStackNavigator } from '@react-navigation/stack';
 import {db } from '../firebaseConfig.js';
 import { doc, getDocs, collection } from 'firebase/firestore';
 
-const Stack = createStackNavigator();
+//const Stack = createStackNavigator();
+//
+//const ParkingInfoScreen = ({route, navigation}) => {
+//
+//  const { item } = route.params;
+//
+//  return (
+//    <View className="flex-1 h-screen bg-white">
+//      <View className="flex-1 items-center mt-20">
+//        <Text>Name: {item.get('name')}</Text>
+//        <Text>Address: {item.get('address')}</Text>
+//        <Text>Allowed Permit: {item.get('restrictedPermit')}</Text>
+//        <Button
+//          title="Open in Maps"
+//          onPress={() => {
+//            const linkURL = "http://maps.apple.com/?daddr="
+//                            + item.get('coords').latitude + ","
+//                            + item.get('coords').longitude;
+//            Linking.openURL(linkURL);
+//          }}
+//        />
+//      </View>
+//    </View>
+//  )
+//
+//}
 
-const ParkingInfoScreen = ({route, navigation}) => {
-
-  const { item } = route.params;
-
-  return (
-    <View className="flex-1 h-screen bg-white">
-      <View className="flex-1 items-center mt-20">
-        <Text>Name: {item.get('name')}</Text>
-        <Text>Address: {item.get('address')}</Text>
-        <Text>Allowed Permit: {item.get('restrictedPermit')}</Text>
-        <Button
-          title="Open in Maps"
-          onPress={() => {
-            const linkURL = "http://maps.apple.com/?daddr="
-                            + item.get('coords').latitude + ","
-                            + item.get('coords').longitude;
-            Linking.openURL(linkURL);
-          }}
-        />
-      </View>
-    </View>
-  )
-
-}
-
-const ListScreen = ({navigation}) => {
+const ListContainer = ({navigation}) => {
 
   const getParkingData = async () => {
     const querySnapshot = await getDocs(collection(db, "parking")).catch((error) => {
@@ -52,8 +52,8 @@ const ListScreen = ({navigation}) => {
       <Item
         item={item}
         onPress={() => {
-          navigation.navigate('Parking Information', {
-            item: item,
+          navigation.navigate('Map', {
+            itemName: item.get('name'),
           });
         }}
       />
@@ -84,13 +84,13 @@ const ListScreen = ({navigation}) => {
 }
 
 
-const ListContainer = () => {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen name="List" component={ListScreen} options={{headerShown: false}} />
-            <Stack.Screen name="Parking Information" component={ParkingInfoScreen} />
-        </Stack.Navigator>
-    )
-}
+//const ListContainer = () => {
+//    return (
+//        <Stack.Navigator>
+//            <Stack.Screen name="List" component={ListScreen} options={{headerShown: false}} />
+//            <Stack.Screen name="Parking Information" component={ParkingInfoScreen} />
+//        </Stack.Navigator>
+//    )
+//}
 
 export default ListContainer;
