@@ -212,6 +212,26 @@ const MapScreen = ({ route, navigation }) => {
     });
   }
 
+  const getPermitValue = (markers, curIndex) => {
+    if (!markers || !markers[curIndex]) return 'Loading...';
+    
+    // Adjusted to navigate through mapValue.fields
+    const details = markers[curIndex].details.mapValue.fields;
+    if (!details || !details.friday) {
+      return 'Details not available';
+    }
+  
+    // Assuming friday and permit have similar structures
+    const permit = details.friday.mapValue.fields.permit.arrayValue.values;
+    if (!permit || permit.length === 0) return 'Permit not available';
+  
+    // Adjusted access based on Firestore structure for arrays
+    const permitValue = permit[0].stringValue;
+    if (!permitValue) return 'Permit value not available';
+  
+    return permitValue;
+  };
+
   
 
 
@@ -305,7 +325,7 @@ const MapScreen = ({ route, navigation }) => {
                       {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
                         <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
                       </View> */}
-                    <Text className="text-xs text-gray-500 text-center">Requires "A Permit" to park.</Text>
+                  <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
                   </View>
                 </View>
                 <Text className="mt-2 text-sm font-medium text-secondary">{markers[curIndex].desc.stringValue}</Text>
