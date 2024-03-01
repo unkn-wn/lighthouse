@@ -51,6 +51,8 @@ const MapScreen = ({ route, navigation }) => {
 
 
   const [markers, setMarkers] = useState([]);
+  const [distanceToSpot, setDistanceToSpot] = useState(null);
+
 
 
   // Bottom Sheet variables and stuff
@@ -167,8 +169,33 @@ const MapScreen = ({ route, navigation }) => {
   }
   // END LOCATION STUFF
 
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2-lat1);
+    var dLon = deg2rad(lon2-lon1); 
+    var a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+      ; 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var d = R * c; // Distance in km
+    return (d * 0.621371);
+  }
+  
+  const deg2rad = (deg) => {
+    return deg * (Math.PI/180)
+  }
 
   const handleMarkerPress = (marker, index) => {
+    const distance = calculateDistance(
+      location.coords.latitude,
+      location.coords.longitude,
+      marker.coords.geoPointValue.latitude,
+      marker.coords.geoPointValue.longitude
+    );
+    setDistanceToSpot(distance.toFixed(2));
+
     handlePresentModalPress();
     setCurIndex(index);
     mapRef.current.animateToRegion({
@@ -184,6 +211,8 @@ const MapScreen = ({ route, navigation }) => {
       return newMarkers;
     });
   }
+
+  
 
 
   return (
@@ -258,6 +287,7 @@ const MapScreen = ({ route, navigation }) => {
                   <View className="flex-col w-2/3 items-left">
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                     <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
+                    <Text className="text-lg mt-1 font-semibold text-secondary">Distance: {distanceToSpot} mi</Text>
                     <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
                     <Pressable
                       onPress={() => {
