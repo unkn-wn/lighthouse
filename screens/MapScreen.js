@@ -20,7 +20,25 @@ import MapView from "react-native-map-clustering";
 // https://github.com/venits/react-native-map-clustering
 
 
-const MapScreen = ({ navigation }) => {
+const MapScreen = ({ route, navigation }) => {
+
+  useEffect(() => {
+    if (route.params) {
+      const { itemName } = route.params;
+      var itemMarker;
+      var itemIndex;
+      for (let i = 0; i < markers.length; i++) {
+        if (markers[i].name.stringValue == itemName) {
+          itemMarker = markers[i];
+          itemIndex = i;
+          console.log(itemMarker.name.stringValue);
+          break;
+        }
+      }
+      handleMarkerPress(itemMarker, itemIndex);
+    }
+  }, [route.params])
+
   const mapRef = useRef(null);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -249,7 +267,7 @@ const MapScreen = ({ navigation }) => {
                         Linking.openURL(linkURL);
                       }}
                     >
-                      <Text className="text-lg font-bold text-blue-500">Open In Maps</Text>
+                      <Text className="text-lg font-semibold text-blue-500">Open In Maps</Text>
                     </Pressable>
                   </View>
                   <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
