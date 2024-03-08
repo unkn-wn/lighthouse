@@ -11,6 +11,7 @@ import SignupScreen from './screens/SignupScreen.js';
 import MapScreen from './screens/MapScreen.js'
 import ProfileContainer from './screens/ProfileContainer.js'
 import ListContainer from './screens/ListContainer.js'
+import ScheduleContainer from './screens/schedule/ScheduleContainer.js';
 
 import GLOBAL from './global.js';
 
@@ -18,7 +19,7 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
-  
+
   // Fixes constant warning about passing an inline function as the component to a Screen
   const NullScreen = () => null;
 
@@ -42,6 +43,11 @@ const App = () => {
                 name="List Container"
                 component={ListContainer}
                 options={{ title: 'List', headerShown: false }}
+              />
+              <Tab.Screen
+                name="Schedule Container"
+                component={ScheduleContainer}
+                options={{ title: 'Schedule', headerShown: false }}
               />
               <Tab.Screen
                 name="Profile Container"
