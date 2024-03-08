@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
 import { db } from '../firebaseConfig.js';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
@@ -243,15 +243,72 @@ const ProfileScreen = ({ navigation }) => {
       });
   }
 
+  async function checkDuplicateUsername() {
+    const querySnapshot = await getDocs(collection(db, "users")).catch((error) => {
+      console.log(error);
+    });
+    const data = querySnapshot.docs.map(doc => doc.data().username);
+    for (let usern of data) {
+      if (usern === usernameChange) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   const setUsernameDatabase = async () => {
+    // Check if username already in use
+    if (await checkDuplicateUsername()) {
+      console.log('Error: Username already in use');
+      setUsernameChange(username);
+      setEditUsername(true);
+      Alert.alert('Username already in use');
+      return;
+    }
+
+    // Update new username in Firebase Auth
+    updateProfile(user, {
+      displayName: usernameChange
+    }).then(() => {
+      console.log('Username updated in auth:', auth.currentUser.displayName);
+    }).catch((error) => {
+      console.log('Error:', error);
+      setError(error.message);
+      return;
+    });
+
+    // Modify username is current doc
     await updateDoc(doc(db, "users", username), {
       username: usernameChange
-    })
+    }).catch((error) => {
+      console.log('Error:', error);
+      return;
+    });
+    console.log('Changed username to', usernameChange);
+
+    // Get old user profile in Firestore
+    var copyData;
+    await getDoc(doc(db, "users", username))
+      .then((doc) => {
+        if (doc.exists()) {
+          copyData = doc.data();
+        }
+      })
       .catch((error) => {
         console.log('Error:', error);
         return;
       });
-    console.log('Changed username to', usernameChange)
+
+    // Create new doc with duplicate data, except using new username
+    if (copyData) {
+      await setDoc(doc(db, "users", usernameChange), copyData);
+      await deleteDoc(doc(db, "users", username));
+      username = usernameChange;
+      console.log("Username change completed");
+    }
+    else {
+      console.log("Data does not exist");
+    }
   }
 
   getUserData(username);
