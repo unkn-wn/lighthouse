@@ -171,20 +171,20 @@ const MapScreen = ({ route, navigation }) => {
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     var R = 6371; // Radius of the earth in km
-    var dLat = deg2rad(lat2-lat1);
-    var dLon = deg2rad(lon2-lon1); 
-    var a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2)
-      ; 
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var dLat = deg2rad(lat2 - lat1);
+    var dLon = deg2rad(lon2 - lon1);
+    var a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2)
+      ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     var d = R * c; // Distance in km
     return (d * 0.621371);
   }
-  
+
   const deg2rad = (deg) => {
-    return deg * (Math.PI/180)
+    return deg * (Math.PI / 180)
   }
 
   const handleMarkerPress = (marker, index) => {
@@ -214,25 +214,25 @@ const MapScreen = ({ route, navigation }) => {
 
   const getPermitValue = (markers, curIndex) => {
     if (!markers || !markers[curIndex]) return 'Loading...';
-    
+
     // Adjusted to navigate through mapValue.fields
     const details = markers[curIndex].details.mapValue.fields;
     if (!details || !details.friday) {
       return 'Details not available';
     }
-  
+
     // Assuming friday and permit have similar structures
     const permit = details.friday.mapValue.fields.permit.arrayValue.values;
     if (!permit || permit.length === 0) return 'Permit not available';
-  
+
     // Adjusted access based on Firestore structure for arrays
     const permitValue = permit[0].stringValue;
     if (!permitValue) return 'Permit value not available';
-  
+
     return permitValue;
   };
 
-  
+
 
 
   return (
@@ -306,9 +306,15 @@ const MapScreen = ({ route, navigation }) => {
                 <View className="flex-row">
                   <View className="flex-col w-2/3 items-left">
                     <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
-                    <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text>
-                    <Text className="text-lg mt-1 font-semibold text-secondary">Distance: {distanceToSpot} mi</Text>
+                    {/* <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text> */}
+                    <Text className="text-sm font-light text-primary">Distance: {distanceToSpot} mi</Text>
                     <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
+                  </View>
+                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
+
+                    {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
+                        <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
+                      </View> */}
                     <Pressable
                       onPress={() => {
                         const linkURL = "http://maps.apple.com/?daddr="
@@ -317,15 +323,9 @@ const MapScreen = ({ route, navigation }) => {
                         Linking.openURL(linkURL);
                       }}
                     >
-                      <Text className="text-lg font-semibold text-blue-500">Open In Maps</Text>
+                      <Text className="text-base font-semibold text-blue-500 text-center">Open In Maps</Text>
                     </Pressable>
-                  </View>
-                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
-
-                      {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
-                        <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
-                      </View> */}
-                  <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
+                    <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
                   </View>
                 </View>
                 <Text className="mt-2 text-sm font-medium text-secondary">{markers[curIndex].desc.stringValue}</Text>

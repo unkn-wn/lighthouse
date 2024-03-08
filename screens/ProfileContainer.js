@@ -9,11 +9,24 @@ import { doc, getDoc, updateDoc, setDoc, deleteDoc, getDocs, collection } from '
 import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
 import { Dropdown } from 'react-native-element-dropdown';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 // import { Press } from 'hammerjs';
 
 const Stack = createStackNavigator();
 
 const EditPasswordScreen = ({ navigation }) => {
+
+  useEffect(() => {
+    let user = getAuth().currentUser;
+    user.reload();
+    if (user != null) {
+      if (!user.emailVerified) {
+        Alert.alert('Verify your email before changing credentials! Please check your inbox or spam folder for the verification email.');
+        navigation.navigate('Profile');
+      }
+    }
+  }, []);
+
 
   // Function to prompt the user for their password using an Alert
   // Used if re-authentication is needed
@@ -195,6 +208,16 @@ const ProfileScreen = ({ navigation }) => {
   }, [vehicleType]);
 
   useEffect(() => {
+    // Check if user email is verified
+    let user = getAuth().currentUser;
+    user.reload();
+    if (user != null) {
+      if (!user.emailVerified && editUsername) {
+        setEditUsername(false);
+        Alert.alert('Verify your email before changing credentials! Please check your inbox or spam folder for the verification email.');
+      }
+    }
+
     if (!editUsername && username != usernameChange) {
       console.log('Changing username from', username, 'to', usernameChange);
       setUsernameDatabase();
@@ -366,6 +389,11 @@ const ProfileScreen = ({ navigation }) => {
             </Pressable>
             <Pressable onPress={() => navigation.navigate('Change Password')}>
               <Text className="mt-4 text-primary font-bold">Change Password</Text>
+            </Pressable>
+          </View>
+          <View className="flex-1 justify-center items-center">
+            <Pressable onPress={() => { getAuth().signOut().then(function() { navigation.navigate('Login'); console.log("Logged out!"); }) }} className="w-1/3 p-2 bg-primary justify-center items-center rounded-xl">
+              <Text className="text-white font-bold text-xl">Log Out</Text>
             </Pressable>
           </View>
         </View>

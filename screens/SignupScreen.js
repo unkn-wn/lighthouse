@@ -1,7 +1,7 @@
 import { Text, View, Keyboard, TouchableWithoutFeedback, Pressable } from 'react-native';
 import { AntDesign } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
 import { useState } from 'react';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 
 
@@ -65,7 +65,7 @@ const SignupScreen = ({ navigation }) => {
           displayName: username
         }).then(() => {
           // Profile updated
-          console.log('Profile updated:', auth.currentUser.displayName);
+          // console.log('Profile updated:', auth.currentUser.displayName);
         }).catch((error) => {
           console.log('Error:', error);
           setError(error.message);
@@ -87,6 +87,10 @@ const SignupScreen = ({ navigation }) => {
           user.delete();
           return;
         };
+
+        sendEmailVerification(user);
+        console.log("Sent email verification");
+        alert('Verification email sent! Please verify your email to enable full functionality.');
 
         GLOBAL.loggedIn = true;
         navigation.navigate('Home', { screen: 'Home' });
