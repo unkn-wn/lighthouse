@@ -9,15 +9,21 @@ const AddStreetParking = () => {
 
   const add = async () => {
     // params
-    const latitude = 40.434318;
-    const longitude = -86.922857;
-    const street = "Hilltop Dr";
-    const parking = PARKING.STREET;
-    const type = "Street Parking";
+    const latitude = 40.415367;
+    const longitude = -86.916744;
+    const street = "Ahlers Dr";
+    const parking = PARKING.LOT;
+    const type = "Parking Lot";
     const dayData = {
       cost: [],
+      endTime: 17,
+      permit: [PERMIT.A],
+      startTime: 7,
+    }
+    const emptyData = {
+      cost: [],
       endTime: -1,
-      permit: [PERMIT.RES],
+      permit: [],
       startTime: -1,
     }
 
@@ -26,15 +32,15 @@ const AddStreetParking = () => {
       address: "",
       alwaysFree: false,
       coords: new GeoPoint(latitude, longitude),
-      desc: "On campus residence hall parking. Requires a Residence Halls Parking Permit.",
+      desc: "On campus parking lot. Requires an A Parking Permit.",
       details: {
         monday: dayData,
         tuesday: dayData,
         wednesday: dayData,
         thursday: dayData,
         friday: dayData,
-        saturday: dayData,
-        sunday: dayData,
+        saturday: emptyData,
+        sunday: emptyData,
       },
       name: street + " " + type,
       parkingType: parking,
