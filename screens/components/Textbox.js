@@ -9,10 +9,15 @@ const Textbox = (props) => {
         className = "bg-gray-300 text-gray-500 w-3/4 rounded-xl py-3 px-2 my-2";
     }
 
+    if (props.style != undefined) {
+        className = "";
+    }
+
     return (
         <TextInput
             placeholder={props.placeholder}
             className={className}
+            style={props.style}
             secureTextEntry={props.secureTextEntry}
             editable={props.editable}
             value={props.value}
