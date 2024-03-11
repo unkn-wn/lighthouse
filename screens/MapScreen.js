@@ -11,6 +11,7 @@ import {
 import { db } from '../firebaseConfig.js';
 import { doc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
+import SearchBar from '../screens/components/SearchBar';
 
 import * as Location from 'expo-location';
 import { Marker, Callout } from 'react-native-maps';
@@ -236,107 +237,110 @@ const MapScreen = ({ route, navigation }) => {
 
 
   return (
-    <BottomSheetModalProvider>
-      <View className="flex-1 bg-white items-center justify-center">
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(false);
-          }}
-        >
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="bg-white w-5/6 p-4 rounded-lg">
-              <Text>Permission to access location was denied. Lighthouse requires your location to find the closest parking options near you. Open settings?</Text>
-              {/* Ok and Cancel buttons */}
-              <View className="flex-row justify-around mt-2">
-                <Button title="No" onPress={() => setModalVisible(false)} />
-                <Button title="Yes" onPress={() => { Linking.openSettings(); setModalVisible(false) }} />
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {!wait && locationRunning && <>
-          <MapView
-            ref={mapRef}
-            className="w-full h-full"
-            provider='google' // 'google' for google maps
-            showsUserLocation={true}
-            showsMyLocationButton={true}
-            showsPointsOfInterest={false}
-            showsCompass={true}
-            initialRegion={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-          // onMarkerPress={(e) => {
-          //   console.log(e.nativeEvent);
-          // }}
-          >
-            {markers.map((marker, index) => (
-              <Marker
-                key={index}
-                coordinate={marker.coords.geoPointValue}
-                title={marker.name.stringValue}
-                description={marker.desc.stringValue}
-                onPress={() => handleMarkerPress(marker, index)}
-                pinColor={marker.color}
-              >
-                <Image source={markers[index].image} style={{ width: 40, height: 40 }} />
-                <Callout tooltip={true} />
-              </Marker>
-            ))}
-
-          </MapView>
-
-          <BottomSheetModal
-            ref={bottomSheetModalRef}
-            index={1}
-            snapPoints={['15%']}
-            enableDynamicSizing
-            onChange={handleSheetChanges}
-            backdropComponent={renderBackdrop}
-          >
-            <BottomSheetView className="flex-1 bg-white w-full h-full p-6">
-              <View className="px-4 pb-6">
-                <View className="flex-row">
-                  <View className="flex-col w-2/3 items-left">
-                    <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
-                    {/* <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text> */}
-                    <Text className="text-sm font-light text-primary">Distance: {distanceToSpot} mi</Text>
-                    <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
-                  </View>
-                  <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
-
-                    {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
-                        <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
-                      </View> */}
-                    <Pressable
-                      onPress={() => {
-                        const linkURL = "http://maps.apple.com/?daddr="
-                          + markers[curIndex].coords.geoPointValue.latitude + ","
-                          + markers[curIndex].coords.geoPointValue.longitude;
-                        Linking.openURL(linkURL);
-                      }}
-                    >
-                      <Text className="text-base font-semibold text-blue-500 text-center">Open In Maps</Text>
-                    </Pressable>
-                    <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
+    <View style={{ flex: 1 }}>
+      <SearchBar style={{ position: 'absolute', top: 20, left: 0, right: 0, zIndex: 1 }} />
+        <BottomSheetModalProvider>
+          <View className="flex-1 bg-white items-center justify-center">
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                setModalVisible(false);
+              }}
+            >
+              <View className="flex-1 justify-center items-center bg-black/50">
+                <View className="bg-white w-5/6 p-4 rounded-lg">
+                  <Text>Permission to access location was denied. Lighthouse requires your location to find the closest parking options near you. Open settings?</Text>
+                  {/* Ok and Cancel buttons */}
+                  <View className="flex-row justify-around mt-2">
+                    <Button title="No" onPress={() => setModalVisible(false)} />
+                    <Button title="Yes" onPress={() => { Linking.openSettings(); setModalVisible(false) }} />
                   </View>
                 </View>
-                <Text className="mt-2 text-sm font-medium text-secondary">{markers[curIndex].desc.stringValue}</Text>
               </View>
-            </BottomSheetView>
-          </BottomSheetModal>
-        </>
-        }
-        <StatusBar style="auto" />
-      </View>
-    </BottomSheetModalProvider>
+            </Modal>
+
+            {!wait && locationRunning && <>
+              <MapView
+                ref={mapRef}
+                className="w-full h-full"
+                provider='google' // 'google' for google maps
+                showsUserLocation={true}
+                showsMyLocationButton={true}
+                showsPointsOfInterest={false}
+                showsCompass={true}
+                initialRegion={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+              // onMarkerPress={(e) => {
+              //   console.log(e.nativeEvent);
+              // }}
+              >
+                {markers.map((marker, index) => (
+                  <Marker
+                    key={index}
+                    coordinate={marker.coords.geoPointValue}
+                    title={marker.name.stringValue}
+                    description={marker.desc.stringValue}
+                    onPress={() => handleMarkerPress(marker, index)}
+                    pinColor={marker.color}
+                  >
+                    <Image source={markers[index].image} style={{ width: 40, height: 40 }} />
+                    <Callout tooltip={true} />
+                  </Marker>
+                ))}
+
+              </MapView>
+
+              <BottomSheetModal
+                ref={bottomSheetModalRef}
+                index={1}
+                snapPoints={['15%']}
+                enableDynamicSizing
+                onChange={handleSheetChanges}
+                backdropComponent={renderBackdrop}
+              >
+                <BottomSheetView className="flex-1 bg-white w-full h-full p-6">
+                  <View className="px-4 pb-6">
+                    <View className="flex-row">
+                      <View className="flex-col w-2/3 items-left">
+                        <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
+                        {/* <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text> */}
+                        <Text className="text-sm font-light text-primary">Distance: {distanceToSpot} mi</Text>
+                        <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
+                      </View>
+                      <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
+
+                        {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
+                            <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
+                          </View> */}
+                        <Pressable
+                          onPress={() => {
+                            const linkURL = "http://maps.apple.com/?daddr="
+                              + markers[curIndex].coords.geoPointValue.latitude + ","
+                              + markers[curIndex].coords.geoPointValue.longitude;
+                            Linking.openURL(linkURL);
+                          }}
+                        >
+                          <Text className="text-base font-semibold text-blue-500 text-center">Open In Maps</Text>
+                        </Pressable>
+                        <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
+                      </View>
+                    </View>
+                    <Text className="mt-2 text-sm font-medium text-secondary">{markers[curIndex].desc.stringValue}</Text>
+                  </View>
+                </BottomSheetView>
+              </BottomSheetModal>
+            </>
+            }
+          <StatusBar style="auto" />
+        </View>
+      </BottomSheetModalProvider>
+    </View>
   );
 }
 
