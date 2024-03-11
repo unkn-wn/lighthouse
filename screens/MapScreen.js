@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, Text, View, Button, Linking, AppState, Modal, Image } from 'react-native';
+import { Pressable, Text, View, Button, Linking, AppState, Modal, Image, Keyboard } from 'react-native';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   BottomSheetModal,
@@ -264,6 +264,7 @@ const MapScreen = ({ route, navigation }) => {
             {!wait && locationRunning && <>
               <MapView
                 ref={mapRef}
+                style={{ flex: 1 }}
                 className="w-full h-full"
                 provider='google' // 'google' for google maps
                 showsUserLocation={true}
@@ -276,6 +277,7 @@ const MapScreen = ({ route, navigation }) => {
                   latitudeDelta: 0.01,
                   longitudeDelta: 0.01,
                 }}
+                onPress={() => Keyboard.dismiss()}
               // onMarkerPress={(e) => {
               //   console.log(e.nativeEvent);
               // }}

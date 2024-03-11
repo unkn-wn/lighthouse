@@ -10,8 +10,7 @@ const SearchBar = () => {
       style={styles.input}
       value={searchText}
       onChangeText={setSearchText}
-      placeholder="Search..." // Optional: Add a placeholder
-      // Other TextInput props
+      placeholder="Search..."
     />
   );
 };
@@ -20,23 +19,21 @@ const styles = StyleSheet.create({
   input: {
     position: 'absolute',
     top: 60,
-    left: 20, // Adjusted for padding from the screen edge
-    right: 20, // Adjusted for padding from the screen edge
-    backgroundColor: 'white', // Sets the background color to white
-    height: 40, // Set a fixed height
-    paddingHorizontal: 10, // Horizontal padding
-    borderRadius: 20, // Rounded corners
+    left: 20,
+    right: 20,
+    backgroundColor: 'white',
+    height: 40,
+    paddingHorizontal: 10,
+    borderRadius: 20,
     zIndex: 1,
-    // Shadow properties
-    shadowColor: "#000", // Shadow color
+    shadowColor: "#000",
     shadowOffset: {
-      width: 0, // Horizontal shadow offset
-      height: 2, // Vertical shadow offset
+      width: 0,
+      height: 2,
     },
-    shadowOpacity: 0.25, // Shadow opacity
-    shadowRadius: 3.84, // Shadow blur radius
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
 
-    // For Android elevation shadow
     elevation: 5,
   },
 });
