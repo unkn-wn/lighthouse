@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, SafeAreaView, Text, View, FlatList, Pressable, Linking } from 'react-native';
+import { Button, SafeAreaView, Text, View, FlatList, Pressable, Linking, ActivityIndicator } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SearchBar from '../screens/components/SearchBar';
 import {db } from '../firebaseConfig.js';
@@ -89,20 +89,26 @@ const ListContainer = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <SearchBar style={{ position: 'absolute', top: 20, left: 0, right: 0, zIndex: 1 }} />
-      <View className="flex-1 h-screen bg-white">
-        <View className="flex-1 max-h-40 items-center bg-primary">
-          <Text className="text-white font-bold text-3xl mt-10 pt-5">Parking Spots</Text>
+      {isLoading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#fe575f" />
         </View>
-        <View className="flex-1 items-center -mt-10">
-          <FlatList
-            className="w-full divide-y divide-solid divide-black"
-            data={DATA}
-            renderItem={renderItem}
-            itemSeparatorComponent={<View className="h-0.5 bg-black" />}
-            keyExtractor={item => item.id}
-          />  
+      ) : (
+        <View className="flex-1 h-screen bg-white">
+          <View className="flex-1 max-h-40 items-center bg-primary">
+            <Text className="text-white font-bold text-3xl mt-10 pt-5">Parking Spots</Text>
+          </View>
+          <View className="flex-1 items-center -mt-10">
+            <FlatList
+              className="w-full divide-y divide-solid divide-black"
+              data={DATA}
+              renderItem={renderItem}
+              itemSeparatorComponent={<View className="h-0.5 bg-black" />}
+              keyExtractor={item => item.id}
+            />  
+          </View>
         </View>
-      </View>
+      )}
     </View>
   )
 }
