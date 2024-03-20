@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SearchContext } from './SearchContext';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { apiKey } from '@env';
 
 const SearchBar = () => {
   const { searchText, setSearchText } = useContext(SearchContext);
@@ -24,7 +25,7 @@ const SearchBar = () => {
           setSearchText(data.description);
         }}
         query={{
-          key: 'AIzaSyCptpZrEBkYmhSawQCNp0gICWNhCHpdbyE',
+          key: apiKey,
           language: 'en',
         }}
         styles={{

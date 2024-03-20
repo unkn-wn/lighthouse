@@ -10,7 +10,7 @@ import fetch from 'node-fetch';
 // Initialize OpenAI client with your API key from .env
 const openai = new OpenAI();
 
-const apiKey = process.env.mapsApiKey;
+const apiKey = process.env.apiKey;
 const query = encodeURIComponent('parking near Purdue University');
 const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${query}&key=${apiKey}`;
 
