@@ -230,7 +230,7 @@ const MapScreen = ({ route, navigation }) => {
     const permitValue = permit[0].stringValue;
     if (!permitValue) return 'Permit value not available';
 
-    return permitValue;
+    return "Requires permit \"" + permitValue + "\" to park.";
   };
 
 
@@ -330,7 +330,7 @@ const MapScreen = ({ route, navigation }) => {
                         >
                           <Text className="text-base font-semibold text-blue-500 text-center">Open In Maps</Text>
                         </Pressable>
-                        <Text className="text-xs text-gray-500 text-center">Requires "{getPermitValue(markers, curIndex)}" to park.</Text>
+                        <Text className="text-xs text-gray-500 text-center">{getPermitValue(markers, curIndex)}</Text>
                       </View>
                     </View>
                     <Text className="mt-2 text-sm font-medium text-secondary">{markers[curIndex].desc.stringValue}</Text>
