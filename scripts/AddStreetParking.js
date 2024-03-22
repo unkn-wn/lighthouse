@@ -9,15 +9,15 @@ const AddStreetParking = () => {
 
   const add = async () => {
     // params
-    const latitude = 40.415367;
-    const longitude = -86.916744;
-    const street = "Ahlers Dr";
+    const latitude = 40.434103;
+    const longitude = -86.922286;
+    const street = "Hilltop Permit";
     const parking = PARKING.LOT;
     const type = "Parking Lot";
     const dayData = {
       cost: [],
       endTime: 17,
-      permit: [PERMIT.A],
+      permit: [PERMIT.B],
       startTime: 7,
     }
     const emptyData = {
@@ -32,7 +32,7 @@ const AddStreetParking = () => {
       address: "",
       alwaysFree: false,
       coords: new GeoPoint(latitude, longitude),
-      desc: "On campus parking lot. Requires an A Parking Permit.",
+      desc: "On campus parking lot. Requires an A or B Parking Permit.",
       details: {
         monday: dayData,
         tuesday: dayData,
@@ -44,6 +44,7 @@ const AddStreetParking = () => {
       },
       name: street + " " + type,
       parkingType: parking,
+      handicapParking: false,
     };
 
     const idName = data.name.replace(/ /g,'') + "";
