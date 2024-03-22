@@ -18,7 +18,16 @@ const ListContainer = ({ navigation }) => {
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      let location = await Location.getLastKnownPositionAsync({maxAge: 60000});
+
+      if (location == null) {
+        try {
+          location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.BestForNavigation});
+        } catch (error) {
+          console.error("Error getting current position", error);
+        }
+      }
+
       getParkingData(location);
     })();
   }, []);
@@ -105,7 +114,7 @@ const ListContainer = ({ navigation }) => {
               renderItem={renderItem}
               itemSeparatorComponent={<View className="h-0.5 bg-black" />}
               keyExtractor={item => item.id}
-            />  
+            />
           </View>
         </View>
       )}

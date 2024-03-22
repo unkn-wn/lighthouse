@@ -312,7 +312,7 @@ const MapScreen = ({ route, navigation }) => {
                       <View className="flex-col w-2/3 items-left">
                         <Text className="text-2xl font-bold text-primary">{markers[curIndex].name.stringValue}</Text>
                         {/* <Text className="text-sm font-light text-primary">{getParkingName(parseInt(markers[curIndex].parkingType.integerValue))}</Text> */}
-                        <Text className="text-sm font-light text-primary">Distance: {distanceToSpot} mi</Text>
+                        <Text className="text-sm font-normal text-primary">Distance: {distanceToSpot} mi</Text>
                         <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
                       </View>
                       <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
