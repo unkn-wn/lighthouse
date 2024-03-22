@@ -21,6 +21,9 @@ import { doc, setDoc, collection, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import GLOBAL from '../../global.js';
 
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { apiKey } from '@env';
+
 
 const Creator = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -59,7 +62,12 @@ const Creator = ({ navigation }) => {
             GLOBAL.scheduleCreated = false;
           }
           if (GLOBAL.scheduleCreated == false && Object.values(data).every(arr => arr.length !== 0)) {
-            navigation.navigate('Assistant');
+            const serializedData = {
+              ...data,
+              startTimes: data.startTimes.map(time => time.toISOString()),
+              endTimes: data.endTimes.map(time => time.toISOString())
+            };
+            navigation.navigate('Assistant', { scheduleData: serializedData });
             GLOBAL.scheduleCreated = true;
           }
 
@@ -147,8 +155,8 @@ const Creator = ({ navigation }) => {
     let data = {
       "classnames": [...classnames],
       "addresses": [...addresses],
-      "startTimes": [...startTimes],
-      "endTimes": [...endTimes],
+      "startTimes": startTimes.map(time => time.toISOString()),
+      "endTimes": endTimes.map(time => time.toISOString()),
       "days": [...days]
     };
 
@@ -168,7 +176,9 @@ const Creator = ({ navigation }) => {
       return;
     };
 
-    navigation.navigate('Assistant');
+    navigation.navigate('Assistant', { scheduleData: data });
+
+    //navigation.navigate('Assistant');
   }
 
   if (loading) {
@@ -218,13 +228,27 @@ const Creator = ({ navigation }) => {
                         </Pressable>
                       </View>
 
-                      <TextInput
+                      <GooglePlacesAutocomplete
                         placeholder="Address"
-                        className="bg-gray-300 text-black w-full rounded-xl py-3 px-2 my-2"
-                        onChangeText={(newAddress) => {
-                          setAddresses(prevAddresses => prevAddresses.map((address, idx) => idx === index ? newAddress : address));
+                        fetchDetails={true}
+                        onPress={(data, details = null) => {
+                          setAddresses(prevAddresses => prevAddresses.map((address, idx) => idx === index ? data.description : address));
                         }}
-                        value={addresses[index]}
+                        query={{
+                          key: apiKey,
+                          language: 'en',
+                        }}
+                        styles={{
+                          textInput: {
+                            backgroundColor: '#d1d5db',
+                            color: 'black',
+                            width: '100%',
+                            borderRadius: 12,
+                            paddingVertical: 12,
+                            paddingHorizontal: 8,
+                            marginVertical: 8,
+                          },
+                        }}
                       />
 
                       <View className="flex flex-row gap-2">

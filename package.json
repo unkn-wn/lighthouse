@@ -29,6 +29,7 @@
     "react-native-element-dropdown": "^2.10.1",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-google-places-autocomplete": "^2.5.6",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-map-clustering": "^3.4.2",
     "react-native-maps": "^1.10.3",
     "react-native-modal-datetime-picker": "^17.1.0",
