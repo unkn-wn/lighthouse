@@ -17,7 +17,7 @@ const LoginScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (email != '') {
-      console.log('Email State Updated: ', email);
+      // console.log('Email State Updated: ', email);
       login();
     }
   }, [email]);
@@ -59,12 +59,16 @@ const LoginScreen = ({ navigation }) => {
 
   const login = async () => {
     if (error == '') {
-      console.log('Email:', email);
-      console.log('Password: ', password);
+      // console.log('Email:', email);
+      // console.log('Password: ', password);
       await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
-          console.log('User logged in:', userCredential.user.uid);
+          // console.log('User logged in:', userCredential.user.uid);
+          setEmail('');
+          setPassword('');
+          setError('');
+
           GLOBAL.loggedIn = true;
           navigation.navigate('Home', { screen: 'Home' });
           // const user = firebase.auth().currentUser;
@@ -89,7 +93,7 @@ const LoginScreen = ({ navigation }) => {
         setForgotPasswordPrompt(false);
       })
       .catch((error) => {
-        if (error.code='auth/invalid-email') {
+        if (error.code = 'auth/invalid-email') {
           Alert.alert("Invalid email");
         }
         else {
@@ -100,7 +104,14 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View className="flex-1 h-screen bg-white">
+      <Pressable
+        className="bg-primary w-1/2 rounded-xl py-5 mt-3"
+        onPress={() => { setEmail('leon.yee@warriorlife.net'); setPassword('123456'); }}
+      >
+        <Text className="text-white font-bold text-center text-lg">ADMIN LOGIN</Text>
+      </Pressable>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+
         <View className="flex-1 items-center mt-20">
           <Image className="object-scale-down h-48 w-48"
             source={require('../assets/logo.png/')}
@@ -127,7 +138,7 @@ const LoginScreen = ({ navigation }) => {
           </Pressable>
           <Pressable
             className="mt-4"
-            onPress={() => {setForgotPasswordPrompt(true); setUsernameEmail(''); }}
+            onPress={() => { setForgotPasswordPrompt(true); setUsernameEmail(''); }}
           >
             <Text className="text-primary">Forgot password?</Text>
           </Pressable>
@@ -168,11 +179,11 @@ const LoginScreen = ({ navigation }) => {
               </Pressable>
             </View>
             <Pressable
-                className="rounded-xl py-2"
-                onPress={() => { setForgotPasswordPrompt(false); }}
-              >
-                <Text className="text-secondary font-bold text-center text-md my-auto">Cancel</Text>
-              </Pressable>
+              className="rounded-xl py-2"
+              onPress={() => { setForgotPasswordPrompt(false); }}
+            >
+              <Text className="text-secondary font-bold text-center text-md my-auto">Cancel</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>

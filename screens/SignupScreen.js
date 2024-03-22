@@ -33,33 +33,33 @@ const SignupScreen = ({ navigation }) => {
 
     // check all fields are filled out and passwords match
     if (username === '' || email === '' || password === '' || retypedPassword === '') {
-      console.log('Error: All fields must be filled out');
+      // console.log('Error: All fields must be filled out');
       setError('All fields must be filled out');
       return;
     }
 
     if (password !== retypedPassword) {
-      console.log('Error: Passwords do not match');
+      // console.log('Error: Passwords do not match');
       setError('Passwords do not match');
       return;
     }
 
     if (await checkDuplicateUsername()) {
-      console.log('Error: Username already in use');
+      // console.log('Error: Username already in use');
       setError('Username already in use');
       return;
     }
 
-    console.log('Username:', username);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Retyped Password:', retypedPassword);
+    // console.log('Username:', username);
+    // console.log('Email:', email);
+    // console.log('Password:', password);
+    // console.log('Retyped Password:', retypedPassword);
 
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed up
         const user = userCredential.user;
-        console.log('User signed up:', user.uid);
+        // console.log('User signed up:', user.uid);
 
         updateProfile(user, {
           displayName: username
@@ -74,12 +74,13 @@ const SignupScreen = ({ navigation }) => {
         });
 
         try {
-          const docRef = setDoc(doc(db, "users", username), {
+          // const docRef =
+          setDoc(doc(db, "users", username), {
             email: email,
             username: username,
             uid: user.uid
           });
-          console.log("Doc written with ID: ", docRef.id);
+          // console.log("Doc written with ID: ", docRef.id);
 
         } catch (error) {
           console.error('Error:', error);
