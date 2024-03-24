@@ -10,6 +10,7 @@ import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
 import { Dropdown } from 'react-native-element-dropdown';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
+import { PERMIT } from './components/Permit.js';
 // import { Press } from 'hammerjs';
 
 const Stack = createStackNavigator();
@@ -176,11 +177,10 @@ const ProfileScreen = ({ navigation }) => {
 
   const listPermits = [
     { label: 'None', value: 'None' },
-    { label: 'A', value: 'A' },
-    { label: 'B', value: 'B' },
-    { label: 'C', value: 'C' },
-    { label: 'CG', value: 'CG' },
-    { label: 'ID', value: 'ID' },
+    { label: PERMIT.A, value: PERMIT.A },
+    { label: PERMIT.B, value: PERMIT.B },
+    { label: PERMIT.C, value: PERMIT.C },
+    { label: PERMIT.RES, value: PERMIT.RES },
   ];
 
   const listVehicles = [

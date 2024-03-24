@@ -3,4 +3,4 @@ export const PERMIT = {
     B: 'B',
     C: 'C',
     RES: 'Residence Halls'
-  };
+};
