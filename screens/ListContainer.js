@@ -32,7 +32,7 @@ const ListContainer = ({ navigation }) => {
       );
   }
 
-  const userPermitAppliesToLocation = (item) => {
+  const userPermitAppliesToLocation = (item) => { // NOTE: CONSIDER REFRESHING PAGE IF USER CHANGES PERMIT??
     const date = new Date();
     const day = date.getDay();
     const hour = date.getHours();
