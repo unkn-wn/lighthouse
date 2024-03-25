@@ -7,12 +7,12 @@ import {
   BottomSheetView,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
-
+import { getAuth } from "firebase/auth";
+import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
-import { doc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
-
+import { PERMIT } from '../screens/components/Permit.js';
 import * as Location from 'expo-location';
 import { Marker, Callout } from 'react-native-maps';
 // https://github.com/react-native-maps/react-native-maps/blob/HEAD/docs/mapview.md
@@ -50,11 +50,96 @@ const MapScreen = ({ route, navigation }) => {
   const [curIndex, setCurIndex] = useState(0);
   const [location, setLocation] = useState({ "coords": { "latitude": 40.426170, "longitude": -86.920284, "accuracy": 0, "altitude": 0, "heading": 0, "speed": 0, "altitudeAccuracy": 0 }, "timestamp": 0 });
 
-
   const [markers, setMarkers] = useState([]);
   const [distanceToSpot, setDistanceToSpot] = useState(null);
 
+  const [permit, setPermit] = useState(null);
 
+  const auth = getAuth();
+  const username = auth.currentUser.displayName;
+
+  const loadUserData = async (username) => {
+    await getDoc(doc(db, "users", username))
+      .then((doc) => {
+        if (doc.exists()) {
+          if (doc.data().permitType != '') {
+            setPermit(doc.data().permitType);
+          }
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      }
+      );
+  }
+
+  const userPermitAppliesToLocation = (item) => {
+    const date = new Date();
+    const day = date.getDay();
+    const hour = date.getHours();
+    let permitDetails = item.details.mapValue.fields;
+
+    // get permit details for current day
+    switch(day) {
+      case 0:
+        permitDetails = permitDetails.sunday;
+        break;
+      case 1:
+        permitDetails = permitDetails.monday;
+        break;
+      case 2:
+        permitDetails = permitDetails.tuesday;
+        break;
+      case 3:
+        permitDetails = permitDetails.wednesday;
+        break;
+      case 4:
+        permitDetails = permitDetails.thursday;
+        break;
+      case 5:
+        permitDetails = permitDetails.friday;
+        break;
+      case 6:
+        permitDetails = permitDetails.saturday;
+        break;
+      default:
+        return false;
+    }
+    permitDetails = permitDetails.mapValue.fields
+
+    if (!permitDetails.permit.arrayValue.values) {
+      return false;
+    }
+      // check if current hour is within permit start and end time at location
+    if ((permitDetails.startTime.integerValue == -1 && permitDetails.endTime.integerValue == -1)
+    || (permitDetails.startTime.integerValue < hour && hour < permitDetails.endTime.integerValue)) {
+      // permit hierarchy
+      switch (permit) {
+        case PERMIT.A:
+          if (permitDetails.permit.arrayValue.values[0].stringValue == PERMIT.A) {
+            return true;
+          }
+        case PERMIT.B:
+          if (permitDetails.permit.arrayValue.values[0].stringValue == PERMIT.B) {
+            return true;
+          }
+        case PERMIT.C:
+          if (permitDetails.permit.arrayValue.values[0].stringValue == PERMIT.C) {
+            return true;
+          }
+          break;
+        case PERMIT.RES:
+          if (permitDetails.permit.arrayValue.values[0].stringValue == PERMIT.RES) {
+            return true;
+          }
+          break;
+        default:
+          return false;
+      }
+    }
+    return false;
+  }
 
   // Bottom Sheet variables and stuff
   const bottomSheetModalRef = useRef(null);
@@ -68,7 +153,12 @@ const MapScreen = ({ route, navigation }) => {
       bottomSheetModalRef.current.dismiss();
       setMarkers((prev) => {
         const newMarkers = [...prev];
-        newMarkers[curIndex].image = require("../assets/marker.png")
+        if (userPermitAppliesToLocation(newMarkers[curIndex])) {
+          newMarkers[curIndex].image = require("../assets/marker3.png");
+        }
+        else {
+          newMarkers[curIndex].image = require("../assets/marker.png");
+        }
         return newMarkers;
       });
     }
@@ -89,7 +179,12 @@ const MapScreen = ({ route, navigation }) => {
       const parkingData = [];
       for (let i = 0; i < querySnapshot.docs.length; i++) {
         const temp = querySnapshot.docs[i]._document.data.value.mapValue.fields;
-        temp.image = require("../assets/marker.png");
+        if (userPermitAppliesToLocation(temp)) {
+          temp.image = require("../assets/marker3.png");
+        }
+        else {
+          temp.image = require("../assets/marker.png");
+        }
         parkingData.push(temp);
       }
 
@@ -207,7 +302,7 @@ const MapScreen = ({ route, navigation }) => {
     }, 500);
     setMarkers((prev) => {
       const newMarkers = [...prev];
-      newMarkers.map((marker) => marker.image = require("../assets/marker.png"));
+      newMarkers.map((marker) => marker.image = (userPermitAppliesToLocation(marker) ? require("../assets/marker3.png") : require("../assets/marker.png")));
       newMarkers[index].image = require("../assets/marker2.png")
       return newMarkers;
     });
@@ -255,6 +350,7 @@ const MapScreen = ({ route, navigation }) => {
     );
   }
 
+  loadUserData(username);
 
   return (
     <View style={{ flex: 1 }}>
