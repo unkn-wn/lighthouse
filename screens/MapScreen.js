@@ -192,7 +192,7 @@ const MapScreen = ({ route, navigation }) => {
       // console.log(parkingData[0]);
     }
     getParkingData();
-  }, []);
+  }, [permit]);
 
   // UseEffect for waiting for parking data to load
   useEffect(() => {
