@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Switch, Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
@@ -409,10 +409,20 @@ const ProfileScreen = ({ navigation }) => {
 }
 
 const SettingsScreen = ({ navigation }) => {
+  
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
   return (
     <View className="flex-1 h-screen bg-white">
       <View className="flex-1 items-center mt-20">
-        <Text className="text-secondaray font-bold text-center text-lg">SETTINGS</Text>
+        <Switch
+          trackColor={{false: '#8e8e93', true: '#fe575f'}}
+          thumbColor={'#1e3446'}
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+        />
+        <Text className="text-secondary font-bold text-center text-lg">Allow Notifications</Text>
       </View>
     </View>
   )
