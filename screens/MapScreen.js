@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, Text, View, Button, Linking, AppState, Modal, Image, Keyboard } from 'react-native';
+import { Alert, Pressable, Text, View, Button, Linking, AppState, Modal, Image, Keyboard } from 'react-native';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   BottomSheetModal,
@@ -233,12 +233,38 @@ const MapScreen = ({ route, navigation }) => {
     return "Requires permit \"" + permitValue + "\" to park.";
   };
 
-
+  const updateParkingLocation = () => {
+    Alert.alert(
+      'Use current location?',
+      '',
+      [
+        {
+          text: 'No',
+          onPress: () => {
+            console.log("No pressed");
+          },
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            console.log(location);
+          }
+        }
+      ]
+    );
+  }
 
 
   return (
     <View style={{ flex: 1 }}>
       <SearchBar style={{ position: 'absolute', top: 20, left: 0, right: 0, zIndex: 1 }} />
+      <Pressable
+        onPress={() => updateParkingLocation()}
+        className="items-center bg-primary justify-start py-2 rounded-full absolute top-20 right-5 my-7 z-10"
+      >
+        <Text className="text-lg text-white px-2">Update Parking Location</Text>
+      </Pressable>
         <BottomSheetModalProvider>
           <View className="flex-1 bg-white items-center justify-center">
             <Modal
