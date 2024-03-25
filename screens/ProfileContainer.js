@@ -343,12 +343,18 @@ const ProfileScreen = ({ navigation }) => {
         setEditUsername(false);
       }}
       >
-        <View className="flex-1 mt-12">
-          <View className="items-center">
-            <Image className="object-scale-down h-32 w-32"
-              source={require('../assets/logo.png/')}
-            />
-          </View>
+      <View className="flex-1 mt-12">
+        <View className="items-center">
+          <Image className="object-scale-down h-32 w-32"
+            source={require('../assets/logo.png/')}
+          />
+      </View>
+      <Pressable
+        onPress={() => navigation.navigate('Settings')}
+        className="items-center justify-start py-2 absolute -top-5 right-5 my-3 z-10"
+      >
+        <Text className="text-lg text-blue-500 px-2">Settings Icon</Text>
+      </Pressable>
           <View className="my-8 mx-10 items-center">
             <Text className="text-primary font-bold text-3xl">Profile</Text>
             <Textbox
@@ -402,11 +408,22 @@ const ProfileScreen = ({ navigation }) => {
   )
 }
 
+const SettingsScreen = ({ navigation }) => {
+  return (
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 items-center mt-20">
+        <Text className="text-secondaray font-bold text-center text-lg">SETTINGS</Text>
+      </View>
+    </View>
+  )
+}
+
 const ProfileContainer = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Change Password" component={EditPasswordScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   )
 }
