@@ -9,7 +9,8 @@ import {
 } from '@gorhom/bottom-sheet';
 
 import { db } from '../firebaseConfig.js';
-import { doc, getDocs, collection } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
 
@@ -54,7 +55,13 @@ const MapScreen = ({ route, navigation }) => {
   const [markers, setMarkers] = useState([]);
   const [distanceToSpot, setDistanceToSpot] = useState(null);
 
-
+  // load in the current user's info
+  const auth = getAuth();
+  const user = auth.currentUser;
+  var username;
+  if (user != null) {
+    username = user.displayName;
+  }
 
   // Bottom Sheet variables and stuff
   const bottomSheetModalRef = useRef(null);
@@ -243,7 +250,17 @@ const MapScreen = ({ route, navigation }) => {
   }
 
 
-  const updateParkingLocation = () => {
+  const updateParkingStatus = async (nearest_marker_name) => {
+    await updateDoc(doc(db, "users", username), {
+        parkingStatus: nearest_marker_name
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
+  }
+
+  const findClosestParking = () => {
     const distanceToMarkers = markers.map(getDistanceFromMarker);
     var lowest_distance = Number.MAX_SAFE_INTEGER;
     var lowest_distance_idx = 0;
@@ -270,7 +287,7 @@ const MapScreen = ({ route, navigation }) => {
         {
           text: 'Yes',
           onPress: () => {
-            // update location in database
+            updateParkingStatus(nearest_marker.name.stringValue);
           }
         }
       ]
@@ -291,7 +308,7 @@ const MapScreen = ({ route, navigation }) => {
         },
         {
           text: 'Yes',
-          onPress: () => {updateParkingLocation()}
+          onPress: () => {findClosestParking()}
         }
       ]
     );
