@@ -10,7 +10,6 @@ import {
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
-import { getAuth } from 'firebase/auth';
 import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
