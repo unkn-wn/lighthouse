@@ -78,7 +78,7 @@ const SignupScreen = ({ navigation }) => {
           setDoc(doc(db, "users", username), {
             email: email,
             username: username,
-            uid: user.uid
+            uid: user.uid,
           });
           // console.log("Doc written with ID: ", docRef.id);
 

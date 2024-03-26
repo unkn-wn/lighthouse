@@ -10,6 +10,8 @@ import {
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
+import { getAuth } from 'firebase/auth';
+import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
 import { PERMIT } from '../screens/components/Permit.js';
@@ -53,6 +55,15 @@ const MapScreen = ({ route, navigation }) => {
   const [markers, setMarkers] = useState([]);
   const [distanceToSpot, setDistanceToSpot] = useState(null);
 
+
+  // load in the current user's info
+  const auth = getAuth();
+  const user = auth.currentUser;
+  var username;
+  if (user != null) {
+    username = user.displayName;
+  }
+  
   const [permit, setPermit] = useState(null);
 
   const auth = getAuth();
@@ -328,7 +339,61 @@ const MapScreen = ({ route, navigation }) => {
     return "Requires permit \"" + permitValue + "\" to park.";
   };
 
-  const updateParkingLocation = () => {
+  const getDistanceFromMarker = (marker) => {
+    return calculateDistance(
+      location.coords.latitude,
+      location.coords.longitude,
+      marker.coords.geoPointValue.latitude,
+      marker.coords.geoPointValue.longitude
+    )
+  }
+
+
+  const updateParkingStatus = async (nearest_marker_name) => {
+    await updateDoc(doc(db, "users", username), {
+        parkingStatus: nearest_marker_name
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
+  }
+
+  const findClosestParking = () => {
+    const distanceToMarkers = markers.map(getDistanceFromMarker);
+    var lowest_distance = Number.MAX_SAFE_INTEGER;
+    var lowest_distance_idx = 0;
+    for (let i = 0; i < distanceToMarkers.length; i++) {
+      if (distanceToMarkers[i] < lowest_distance) {
+        lowest_distance = distanceToMarkers[i];
+        lowest_distance_idx = i;
+      }
+    }
+    const nearest_marker = markers[lowest_distance_idx];
+    console.log(nearest_marker.name.stringValue);
+    console.log(distanceToMarkers[lowest_distance_idx])
+    Alert.alert(
+      'Are you parked here?',
+      nearest_marker.name.stringValue,
+      [
+        {
+          text: 'No',
+          onPress: () => {
+            console.log("not parked there");
+          },
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => {
+            updateParkingStatus(nearest_marker.name.stringValue);
+          }
+        }
+      ]
+    )
+  }
+
+  const sendParkingLocationAlert = () => {
     Alert.alert(
       'Use current location?',
       '',
@@ -342,9 +407,7 @@ const MapScreen = ({ route, navigation }) => {
         },
         {
           text: 'Yes',
-          onPress: () => {
-            console.log(location);
-          }
+          onPress: () => {findClosestParking()}
         }
       ]
     );
@@ -356,7 +419,7 @@ const MapScreen = ({ route, navigation }) => {
     <View style={{ flex: 1 }}>
       <SearchBar style={{ position: 'absolute', top: 20, left: 0, right: 0, zIndex: 1 }} />
       <Pressable
-        onPress={() => updateParkingLocation()}
+        onPress={() => sendParkingLocationAlert()}
         className="items-center bg-primary justify-start py-2 rounded-full absolute top-20 right-5 my-7 z-10"
       >
         <Text className="text-lg text-white px-2">Update Parking Location</Text>

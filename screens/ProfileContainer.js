@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Switch, Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
@@ -343,12 +343,18 @@ const ProfileScreen = ({ navigation }) => {
         setEditUsername(false);
       }}
       >
-        <View className="flex-1 mt-12">
-          <View className="items-center">
-            <Image className="object-scale-down h-32 w-32"
-              source={require('../assets/logo.png/')}
-            />
-          </View>
+      <View className="flex-1 mt-12">
+        <View className="items-center">
+          <Image className="object-scale-down h-32 w-32"
+            source={require('../assets/logo.png/')}
+          />
+      </View>
+      <Pressable
+        onPress={() => navigation.navigate('Settings')}
+        className="items-center justify-start py-2 absolute -top-5 right-5 my-3 z-10"
+      >
+        <Text className="text-lg text-blue-500 px-2">Settings Icon</Text>
+      </Pressable>
           <View className="my-8 mx-10 items-center">
             <Text className="text-primary font-bold text-3xl">Profile</Text>
             <Textbox
@@ -402,11 +408,32 @@ const ProfileScreen = ({ navigation }) => {
   )
 }
 
+const SettingsScreen = ({ navigation }) => {
+  
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  return (
+    <View className="flex-1 h-screen bg-white">
+      <View className="flex-1 items-center mt-20">
+        <Switch
+          trackColor={{false: '#8e8e93', true: '#fe575f'}}
+          thumbColor={'#1e3446'}
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+        />
+        <Text className="text-secondary font-bold text-center text-lg">Allow Notifications</Text>
+      </View>
+    </View>
+  )
+}
+
 const ProfileContainer = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Change Password" component={EditPasswordScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   )
 }
