@@ -10,7 +10,6 @@ import {
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
-import { doc, updateDoc, getDocs, collection } from 'firebase/firestore';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
 import { PERMIT } from '../screens/components/Permit.js';
@@ -65,7 +64,7 @@ const MapScreen = ({ route, navigation }) => {
   
   const [permit, setPermit] = useState(null);
 
-  const username = auth.currentUser.displayName;
+  //const username = auth.currentUser.displayName;
 
   const loadUserData = async (username) => {
     await getDoc(doc(db, "users", username))
