@@ -66,7 +66,6 @@ const MapScreen = ({ route, navigation }) => {
   
   const [permit, setPermit] = useState(null);
 
-  const auth = getAuth();
   const username = auth.currentUser.displayName;
 
   const loadUserData = async (username) => {
