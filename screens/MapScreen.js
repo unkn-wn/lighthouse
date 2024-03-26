@@ -356,7 +356,7 @@ const MapScreen = ({ route, navigation }) => {
       });
   }
 
-  const findClosestParking = () => {
+  const findClosestParking = async () => {
     const distanceToMarkers = markers.map(getDistanceFromMarker);
     var lowest_distance = Number.MAX_SAFE_INTEGER;
     var lowest_distance_idx = 0;
@@ -369,25 +369,41 @@ const MapScreen = ({ route, navigation }) => {
     const nearest_marker = markers[lowest_distance_idx];
     console.log(nearest_marker.name.stringValue);
     console.log(distanceToMarkers[lowest_distance_idx])
-    Alert.alert(
-      'Are you parked here?',
-      nearest_marker.name.stringValue,
-      [
-        {
-          text: 'No',
-          onPress: () => {
-            console.log("not parked there");
-          },
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: () => {
-            updateParkingStatus(nearest_marker.name.stringValue);
-          }
+    
+    // check setting for parking confirmation
+    var confirmLocation;
+    await getDoc(doc(db, "users", username))
+      .then((doc) => {
+        if (doc.exists() && !doc.data().confirmCorrectLocation) {
+          confirmLocation = false;
+        } else {
+          confirmLocation = true;
         }
-      ]
-    )
+      });
+    if (confirmLocation) {
+      Alert.alert(
+        'Are you parked here?',
+        nearest_marker.name.stringValue,
+        [
+          {
+            text: 'No',
+            onPress: () => {
+              console.log("not parked there");
+            },
+            style: 'cancel',
+          },
+          {
+            text: 'Yes',
+            onPress: () => {
+              updateParkingStatus(nearest_marker.name.stringValue);
+            }
+          }
+        ]
+      )
+    } else {
+      updateParkingStatus(nearest_marker.name.stringValue);
+    }
+
   }
 
   const sendParkingLocationAlert = () => {
