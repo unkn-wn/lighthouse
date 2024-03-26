@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Switch, Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Switch, Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback, requireNativeComponent } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign } from '@expo/vector-icons';
@@ -351,9 +351,9 @@ const ProfileScreen = ({ navigation }) => {
       </View>
       <Pressable
         onPress={() => navigation.navigate('Settings')}
-        className="items-center justify-start py-2 absolute -top-5 right-5 my-3 z-10"
+        className="items-center justify-start absolute -top-5 right-5 my-3 z-10"
       >
-        <Text className="text-lg text-blue-500 px-2">Settings Icon</Text>
+        <Image className="px-2 w-20 h-20" source={require("../assets/settings-icon.png")} />
       </Pressable>
           <View className="my-8 mx-10 items-center">
             <Text className="text-primary font-bold text-3xl">Profile</Text>
@@ -410,19 +410,64 @@ const ProfileScreen = ({ navigation }) => {
 
 const SettingsScreen = ({ navigation }) => {
   
+
+
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  var username;
+  if (user != null) {
+    username = user.displayName;
+  }
+
+  // get the initial settings
+  const getSettingsData = async () => {
+    await getDoc(doc(db, "users", username))
+      .then((doc) => {
+        if (doc.exists()) {
+          setIsEnabled(doc.data().confirmCorrectLocation);
+        }
+      })
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
+  }
+
   const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+
+  const toggleSwitch = async () => {
+    //console.log(previousState);
+    setIsEnabled(previousState => !previousState);
+    //send the update to firebase
+    // for some reason, isEnabled is backwards
+    await updateDoc(doc(db, "users", username), {
+      confirmCorrectLocation: !isEnabled
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+      return;
+    });
+  }
+
+  useEffect(() => {
+    getSettingsData();
+  }, []);
+
 
   return (
     <View className="flex-1 h-screen bg-white">
-      <View className="flex-1 items-center mt-20">
-        <Switch
-          trackColor={{false: '#8e8e93', true: '#fe575f'}}
-          thumbColor={'#1e3446'}
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-        <Text className="text-secondary font-bold text-center text-lg">Allow Notifications</Text>
+      <View className="flex-1 items-center mt-10">
+        <View className="flex-1 mt-0 max-h-10 w-full">
+          <Switch
+            className="absolute right-10"
+            trackColor={{false: '#8e8e93', true: '#fe575f'}}
+            thumbColor={'#1e3446'}
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
+          <Text className="text-secondary font-bold absolute left-7 text-xl">Confirm correct location</Text>
+        </View>
       </View>
     </View>
   )
