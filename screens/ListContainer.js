@@ -66,7 +66,7 @@ const ListContainer = ({ navigation }) => {
     }
 
     // check if current hour is within permit start and end time at location
-    if (permitDetails.startTime < hour && hour < permitDetails.endTime) {
+    if ((permitDetails.startTime == -1 && permitDetails.endTime == -1) || (permitDetails.startTime < hour && hour < permitDetails.endTime)) {
       // permit hierarchy
       switch (permit) {
         case PERMIT.A:
