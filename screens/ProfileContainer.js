@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Switch, Pressable, SafeAreaView, Image, Text, TextInput, View, Alert, Keyboard, TouchableWithoutFeedback, requireNativeComponent } from 'react-native';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, updateProfile } from "firebase/auth";
 import { createStackNavigator } from '@react-navigation/stack';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { db } from '../firebaseConfig.js';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
@@ -343,18 +343,18 @@ const ProfileScreen = ({ navigation }) => {
         setEditUsername(false);
       }}
       >
-      <View className="flex-1 mt-12">
-        <View className="items-center">
-          <Image className="object-scale-down h-32 w-32"
-            source={require('../assets/logo.png/')}
-          />
-      </View>
-      <Pressable
-        onPress={() => navigation.navigate('Settings')}
-        className="items-center justify-start absolute -top-5 right-5 my-3 z-10"
-      >
-        <Image className="px-2 w-20 h-20" source={require("../assets/settings-icon.png")} />
-      </Pressable>
+        <View className="flex-1 mt-12">
+          <View className="items-center">
+            <Image className="object-scale-down h-32 w-32"
+              source={require('../assets/logo.png/')}
+            />
+          </View>
+          <Pressable
+            onPress={() => navigation.navigate('Settings')}
+            className="items-center justify-start absolute -top-5 right-5 my-3 z-10"
+          >
+            <Feather name="settings" size={28} color="#fe575f" />
+          </Pressable>
           <View className="my-8 mx-10 items-center">
             <Text className="text-primary font-bold text-3xl">Profile</Text>
             <Textbox
@@ -398,7 +398,7 @@ const ProfileScreen = ({ navigation }) => {
             </Pressable>
           </View>
           <View className="flex-1 justify-center items-center">
-            <Pressable onPress={() => { getAuth().signOut().then(function() { navigation.navigate('Login'); console.log("Logged out!"); }) }} className="w-1/3 p-2 bg-primary justify-center items-center rounded-xl">
+            <Pressable onPress={() => { getAuth().signOut().then(function () { navigation.navigate('Login'); console.log("Logged out!"); }) }} className="w-1/3 p-2 bg-primary justify-center items-center rounded-xl">
               <Text className="text-white font-bold text-xl">Log Out</Text>
             </Pressable>
           </View>
@@ -409,7 +409,7 @@ const ProfileScreen = ({ navigation }) => {
 }
 
 const SettingsScreen = ({ navigation }) => {
-  
+
 
 
   const auth = getAuth();
@@ -444,10 +444,10 @@ const SettingsScreen = ({ navigation }) => {
     await updateDoc(doc(db, "users", username), {
       confirmCorrectLocation: !isEnabled
     })
-    .catch((error) => {
-      console.log('Error:', error);
-      return;
-    });
+      .catch((error) => {
+        console.log('Error:', error);
+        return;
+      });
   }
 
   useEffect(() => {
@@ -461,7 +461,7 @@ const SettingsScreen = ({ navigation }) => {
         <View className="flex-1 mt-0 max-h-10 w-full">
           <Switch
             className="absolute right-10"
-            trackColor={{false: '#8e8e93', true: '#fe575f'}}
+            trackColor={{ false: '#8e8e93', true: '#fe575f' }}
             thumbColor={'#1e3446'}
             onValueChange={toggleSwitch}
             value={isEnabled}
