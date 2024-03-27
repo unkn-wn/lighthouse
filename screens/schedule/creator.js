@@ -185,7 +185,7 @@ const Creator = ({ navigation }) => {
     <>
       <SafeAreaView className="flex-1 bg-white">
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <ScrollView keyboardShouldPersistTaps='always' contentContainerStyle={{ flexGrow: 1 }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
               <View className="bg-white w-screen pt-10 px-10 mb-48">
                 <Text className="text-3xl font-bold mb-6 text-left text-primary">Scheduling{"\n"}Assistant</Text>
@@ -219,16 +219,26 @@ const Creator = ({ navigation }) => {
                           <Entypo name="minus" size={24} color="white" />
                         </Pressable>
                       </View>
-
-                      <TextInput
-                        placeholder="Address"
-                        className="bg-gray-300 text-black w-full rounded-xl py-3 px-2 my-2"
-                        onChangeText={(newAddress) => {
-                          setAddresses(prevAddresses => prevAddresses.map((address, idx) => idx === index ? newAddress : address));
-                        }}
-                        value={addresses[index]}
-                      />
-
+                      <View style={styles.searchBarContainer}>
+                        <GooglePlacesAutocomplete
+                          placeholder={addresses[index] || 'Address'}
+                          fetchDetails={true}
+                          onPress={(data, details = null) => {
+                            setAddresses(prevAddresses => prevAddresses.map((address, idx) => idx === index ? data.description : address));
+                          }}
+                          query={{
+                            key: apiKey,
+                            language: 'en',
+                          }}
+                          styles={{
+                            textInput: styles.input,
+                          }}
+                          //ref={ref => {
+                          //  ref?.setAddressText(addresses[index])
+                          //}}
+                          //value={addresses[index] || ''}
+                        />
+                      </View>
                       <View className="flex flex-row gap-2">
                         <Pressable onPress={() => { setDatePickerVisibility(true); setWhichPicker({ "which": "start", "index": index }) }} className="flex-1 bg-gray-300 text-black rounded-xl py-3 px-2 my-2">
                           <Text className={startTimes[index] ? "text-black" : "text-gray-400"}>
@@ -307,5 +317,17 @@ const Creator = ({ navigation }) => {
     </>
   )
 }
+
+const styles = {
+  searchBarContainer: {
+    paddingTop: 8, // Add padding from the top
+  },
+  input: {
+    backgroundColor: '#d1d4da',
+    height: 40,
+    paddingHorizontal: 10,
+    borderRadius: 13,
+  },
+};
 
 export default Creator;
