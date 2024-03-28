@@ -20,6 +20,7 @@ import { Marker, Callout } from 'react-native-maps';
 // https://www.npmjs.com/package/react-native-maps
 import MapView from "react-native-map-clustering";
 // https://github.com/venits/react-native-map-clustering
+import { FontAwesome } from '@expo/vector-icons';
 
 
 const MapScreen = ({ route, navigation }) => {
@@ -618,7 +619,7 @@ const MapScreen = ({ route, navigation }) => {
                         <Text className="text-sm mt-1 font-semibold text-secondary">{markers[curIndex].address.stringValue}</Text>
                       </View>
                       <View className="flex-col gap-2 w-1/3 h-fit justify-center items-center">
-
+                        {markers[curIndex].handicapParking.booleanValue && (<FontAwesome name="wheelchair" size={24} color="black"/>)}
                         {/* <View className="w-16 h-16 rounded-full shadow-xl bg-primary justify-center items-center">
                             <Image className="w-10 h-10 -translate-x-0.5 translate-y-0.5" source={require("../assets/navigator.png")} />
                           </View> */}
