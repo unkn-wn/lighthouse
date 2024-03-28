@@ -8,10 +8,11 @@ import { getAuth } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { PERMIT } from '../screens/components/Permit.js';
 
-import { NotificationContext } from '../screens/components/NotificationHandler.js';
+import { useTriggerNotificationDate, useTriggerNotificationTime } from '../screens/components/NotificationHandler.js';
 
 const ListContainer = ({ navigation }) => {
-  const triggerNotifications = useContext(NotificationContext);
+  const triggerNotificationDate = useTriggerNotificationDate();
+  const triggerNotificationTime = useTriggerNotificationTime();
 
   const [DATA, setDATA] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -209,7 +210,7 @@ const ListContainer = ({ navigation }) => {
             <Text className="text-white font-bold text-3xl mt-10 pt-5">Parking Spots</Text>
           </View>
           <View className="flex-1 items-center -mt-10">
-          <Button onPress={() => triggerNotifications("test", "TESTTEST - btw remove this button later its just to test notifs", 0, 0, 2)} title="Trigger Local Notifications" color="#841584" accessibilityLabel="Trigger Local Notifications" />
+          <Button onPress={() => triggerNotificationDate("test", "TESTTEST - btw remove this button later its just to test notifs", 2024, 3, 28, 0, 28, 0)} title="Trigger Local Notifications" color="#841584" accessibilityLabel="Trigger Local Notifications" />
             <FlatList
               className="w-full divide-y divide-solid divide-black"
               data={DATA}

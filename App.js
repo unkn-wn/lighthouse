@@ -4,7 +4,7 @@ LogBox.ignoreAllLogs();//Ignore all log notifications
 import React, { useState, useEffect, createContext } from 'react';
 
 import * as Notifications from 'expo-notifications';
-import { useTriggerNotifications, NotificationContext } from './screens/components/NotificationHandler.js';
+import { useTriggerNotificationTime, useTriggerNotificationDate, NotificationContext } from './screens/components/NotificationHandler.js';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -30,7 +30,8 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const App = () => {
-  const triggerNotifications = useTriggerNotifications();
+  const triggerNotificationTime = useTriggerNotificationTime();
+  const triggerNotificationDate = useTriggerNotificationDate();
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -71,7 +72,7 @@ const App = () => {
           </View>
         </View>
       </Modal>
-      <NotificationContext.Provider value={triggerNotifications}>
+      <NotificationContext.Provider value={{triggerNotificationTime, triggerNotificationDate}}>
         <SearchContext.Provider value={{ searchText, setSearchText }}>
           <NavigationContainer>
 
