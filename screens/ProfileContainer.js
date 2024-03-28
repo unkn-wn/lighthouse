@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { db } from '../firebaseConfig.js';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
+import GLOBAL from '../global.js';
 
 import Textbox from './components/Textbox.js';
 import DropdownMenu from './components/DropdownMenu.js';
@@ -398,7 +399,7 @@ const ProfileScreen = ({ navigation }) => {
             </Pressable>
           </View>
           <View className="flex-1 justify-center items-center">
-            <Pressable onPress={() => { getAuth().signOut().then(function () { navigation.navigate('Login'); console.log("Logged out!"); }) }} className="w-1/3 p-2 bg-primary justify-center items-center rounded-xl">
+            <Pressable onPress={() => { getAuth().signOut().then(function () { GLOBAL.loggedIn = false; GLOBAL.scheduleCreated = false; navigation.navigate('Login'); console.log("Logged out!"); }) }} className="w-1/3 p-2 bg-primary justify-center items-center rounded-xl">
               <Text className="text-white font-bold text-xl">Log Out</Text>
             </Pressable>
           </View>

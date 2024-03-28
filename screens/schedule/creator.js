@@ -13,6 +13,7 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Entypo, Feather } from '@expo/vector-icons'; // https://icons.expo.fyi/Index
 
@@ -37,8 +38,34 @@ const Creator = ({ navigation }) => {
   const [endTimes, setEndTimes] = useState([null]);
   const [days, setDays] = useState([{ "M": false, "T": false, "W": false, "Th": false, "F": false }]);
 
+  // Checking if email has been verified
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+      let user = getAuth().currentUser;
+      user.reload();
+      if (user != null) {
+        if (!user.emailVerified) {
+          Alert.alert(
+            'Verify your email before creating a schedule!',
+            'Please check your inbox or spam folder for the verification email.',
+            [
+              {
+                text: 'OK',
+                onPress: () => navigation.navigate('Map')
+              }
+            ],
+            { cancelable: false }
+          );
+          return;
+        }
+      }
+    }
+  }, [isFocused]);
+
 
   useEffect(() => {
+
     const fetchData = async () => {
       try {
         const username = getAuth().currentUser.displayName;
@@ -70,6 +97,8 @@ const Creator = ({ navigation }) => {
         }
       } catch (error) {
         console.error("Error getting document:", error);
+        console.log("Probably because the user has not created a schedule yet.");
+        setLoading(false);
       }
     };
 
@@ -233,6 +262,10 @@ const Creator = ({ navigation }) => {
                           styles={{
                             textInput: styles.input,
                           }}
+                        //ref={ref => {
+                        //  ref?.setAddressText(addresses[index])
+                        //}}
+                        //value={addresses[index] || ''}
                         />
                       </View>
                       <View className="flex flex-row gap-2">
