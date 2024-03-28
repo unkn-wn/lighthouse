@@ -9,7 +9,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import Checkbox from 'expo-checkbox';
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, getDoc, getDocs, updateDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
 import { getParkingName } from './components/Parking.js';
 import SearchBar from '../screens/components/SearchBar';
@@ -22,6 +22,7 @@ import MapView from "react-native-map-clustering";
 // https://github.com/venits/react-native-map-clustering
 import { FontAwesome } from '@expo/vector-icons';
 
+import { useTriggerNotificationDate, useTriggerNotificationTime } from '../screens/components/NotificationHandler.js';
 
 const MapScreen = ({ route, navigation }) => {
 
@@ -65,6 +66,7 @@ const MapScreen = ({ route, navigation }) => {
   const [markers, setMarkers] = useState([]);
   const [distanceToSpot, setDistanceToSpot] = useState(null);
 
+  const triggerNotificationTime = useTriggerNotificationTime()
 
   // load in the current user's info
   const auth = getAuth();
@@ -363,9 +365,16 @@ const MapScreen = ({ route, navigation }) => {
   }
 
 
-  const updateParkingStatus = async (nearest_marker_name) => {
+  const updateParkingStatus = async (nearest_marker) => {
     await updateDoc(doc(db, "users", username), {
-        parkingStatus: nearest_marker_name
+        parkingStatus: nearest_marker.name.stringValue
+      })
+      .then(() => {
+        if (nearest_marker.timeLimit) {
+          //console.log("time limit: " + nearest_marker.timeLimit.integerValue);
+          triggerNotificationTime("Parking Time Limit", "Move your car!",
+                                  nearest_marker.timeLimit.integerValue, 0, 0);
+        }
       })
       .catch((error) => {
         console.log('Error:', error);
@@ -412,13 +421,13 @@ const MapScreen = ({ route, navigation }) => {
           {
             text: 'Yes',
             onPress: () => {
-              updateParkingStatus(nearest_marker.name.stringValue);
+              updateParkingStatus(nearest_marker);
             }
           }
         ]
       )
     } else {
-      updateParkingStatus(nearest_marker.name.stringValue);
+      updateParkingStatus(nearest_marker);
     }
 
   }
@@ -527,7 +536,7 @@ const MapScreen = ({ route, navigation }) => {
           }
           if (currentFilter == 'C') {
             setCheckBoxes('C', true);
-            returnk;
+            return;
           }
           if (currentFilter == 'R') {
             setCheckBoxes('R', true);
