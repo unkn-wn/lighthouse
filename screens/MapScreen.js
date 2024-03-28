@@ -7,6 +7,7 @@ import {
   BottomSheetView,
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
+import Checkbox from 'expo-checkbox';
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig.js';
@@ -27,16 +28,17 @@ const MapScreen = ({ route, navigation }) => {
     if (route.params) {
       const { itemName } = route.params;
       var itemMarker;
-      var itemIndex;
+      var itemIndex = -1;
       for (let i = 0; i < markers.length; i++) {
         if (markers[i].name.stringValue == itemName) {
           itemMarker = markers[i];
           itemIndex = i;
-          console.log(itemMarker.name.stringValue);
           break;
         }
       }
-      handleMarkerPress(itemMarker, itemIndex);
+      if (itemIndex > -1) {
+        handleMarkerPress(itemMarker, itemIndex);
+      }
     }
   }, [route.params])
 
@@ -45,11 +47,20 @@ const MapScreen = ({ route, navigation }) => {
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const [locationRunning, setLocationRunning] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [toggleBoxA, setBoxA] = useState(false);
+  const [toggleBoxB, setBoxB] = useState(false);
+  const [toggleBoxC, setBoxC] = useState(false);
+  const [toggleResidential, setResidential] = useState(false);
+  const [toggleAll, setAll] = useState(true);
+  const [isChecked, setIsChecked] = useState(true);
+  const [currentFilter, setCurrentFilter] = useState('all');
 
   const [wait, setWait] = useState(true);
   const [curIndex, setCurIndex] = useState(0);
   const [location, setLocation] = useState({ "coords": { "latitude": 40.426170, "longitude": -86.920284, "accuracy": 0, "altitude": 0, "heading": 0, "speed": 0, "altitudeAccuracy": 0 }, "timestamp": 0 });
 
+  const [allMarkers, setAllMarkers] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [distanceToSpot, setDistanceToSpot] = useState(null);
 
@@ -196,6 +207,11 @@ const MapScreen = ({ route, navigation }) => {
         parkingData.push(temp);
       }
 
+      // set all markers initially
+      setAllMarkers(parkingData);
+      // reset filter
+      setBoxA(false); setBoxB(false); setBoxC(false); setResidential(false); setAll(true);
+
       setMarkers(parkingData);
       // console.log(parkingData[0]);
     }
@@ -333,7 +349,7 @@ const MapScreen = ({ route, navigation }) => {
     const permitValue = permit[0].stringValue;
     if (!permitValue) return 'Permit value not available';
 
-    return "Requires permit \"" + permitValue + "\" to park.";
+    return "Requires permit " + permitValue + " to park";
   };
 
   const getDistanceFromMarker = (marker) => {
@@ -426,6 +442,66 @@ const MapScreen = ({ route, navigation }) => {
     );
   }
 
+  const filterMarkersByPermit = (permitType) => {
+    console.log(allMarkers[0]);
+    if (permitType == 'all') {
+      setMarkers(allMarkers);
+      return;
+    }
+    let newMarkers = [];
+    let testString = "Requires permit " + permitType + " to park";
+    for (let i = 0; i < allMarkers.length; i++) {
+      if (getPermitValue(allMarkers, i) == testString) {
+        newMarkers.push(allMarkers[i]);
+      }
+    }
+    setMarkers(newMarkers);
+  }
+
+  const setCheckBoxes = (permitType, newValue) => {
+    setIsChecked(newValue);
+    if (permitType == 'A') {
+      setBoxA(newValue);
+      setBoxB(false);
+      setBoxC(false);
+      setResidential(false);
+      setAll(false);
+      return;
+    }
+    if (permitType == 'B') {
+      setBoxA(false);
+      setBoxB(newValue);
+      setBoxC(false);
+      setResidential(false);
+      setAll(false);
+      return;
+    }
+    if (permitType == 'C') {
+      setBoxA(false);
+      setBoxB(false);
+      setBoxC(newValue);
+      setResidential(false);
+      setAll(false);
+      return;
+    }
+    if (permitType == 'R') {
+      setBoxA(false);
+      setBoxB(false);
+      setBoxC(false);
+      setResidential(newValue);
+      setAll(false);
+      return;
+    }
+    if (permitType == 'all') {
+      setBoxA(false);
+      setBoxB(false);
+      setBoxC(false);
+      setResidential(false);
+      setAll(newValue);
+      return;
+    }
+  }
+
   loadUserData(username);
 
   return (
@@ -436,6 +512,34 @@ const MapScreen = ({ route, navigation }) => {
         className="items-center bg-primary justify-start py-2 rounded-full absolute top-20 right-5 my-7 z-10"
       >
         <Text className="text-lg text-white px-2">Update Parking Location</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => {
+          setFilterModalVisible(!filterModalVisible);
+          if (currentFilter == 'A') {
+            setCheckBoxes('A', true);
+            return;
+          }
+          if (currentFilter == 'B') {
+            setCheckBoxes('B', true);
+            return;
+          }
+          if (currentFilter == 'C') {
+            setCheckBoxes('C', true);
+            returnk;
+          }
+          if (currentFilter == 'R') {
+            setCheckBoxes('R', true);
+            return;
+          }
+          if (currentFilter == 'all') {
+            setCheckBoxes('all', true);
+            return;
+          }
+        }}
+        className="items-center bg-primary justify-start py-2 rounded-full absolute top-20 left-5 my-7 z-10"
+      >
+        <Text className="text-lg text-white px-2">Filter</Text>
       </Pressable>
         <BottomSheetModalProvider>
           <View className="flex-1 bg-white items-center justify-center">
@@ -535,6 +639,82 @@ const MapScreen = ({ route, navigation }) => {
                   </View>
                 </BottomSheetView>
               </BottomSheetModal>
+              <Modal
+                animationType="none"
+                transparent={true}
+                visible={filterModalVisible}
+                onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                <View className="flex-1 justify-center items-center bg-black/10"> 
+                  <View className="bg-white w-2/3 p-4 rounded-lg">
+                    <Text className="text-xl text-secondary self-center font-bold">Filter By:</Text>
+                    
+                    <View className="flex-1 mt-5 h-10 w-full">
+                      <Text className="text-lg text-secondary absolute left-10">Permit A</Text>
+                      <Checkbox
+                        className="absolute right-10"
+                        disabled={(isChecked && !toggleBoxA)}
+                        value={toggleBoxA}
+                        onValueChange={(newValue) => setCheckBoxes('A', newValue)}
+                      />
+                    </View>
+
+                    <View className="flex-1 mt-10 h-10 w-full">
+                      <Text className="text-lg text-secondary absolute left-10">Permit B</Text>
+                      <Checkbox
+                        className="absolute right-10"
+                        disabled={(isChecked && !toggleBoxB)}
+                        value={toggleBoxB}
+                        onValueChange={(newValue) => setCheckBoxes('B', newValue)}
+                      />
+                    </View>
+
+                    <View className="flex-1 mt-10 h-10 w-full">
+                      <Text className="text-lg text-secondary absolute left-10">Permit C</Text>
+                      <Checkbox
+                        className="absolute right-10"
+                        disabled={(isChecked && !toggleBoxC)}
+                        value={toggleBoxC}
+                        onValueChange={(newValue) => setCheckBoxes('C', newValue)}
+                      />
+                    </View>
+
+                    <View className="flex-1 mt-10 h-10 w-full">
+                      <Text className="text-lg text-secondary absolute left-10">Residential</Text>
+                      <Checkbox
+                        className="absolute right-10"
+                        disabled={(isChecked && !toggleResidential)}
+                        value={toggleResidential}
+                        onValueChange={(newValue) => setCheckBoxes('R', newValue)}
+                      />
+                    </View>
+                    
+                    <View className="flex-1 mt-10 h-10 w-full">
+                      <Text className="text-lg text-secondary absolute left-10">All</Text>
+                      <Checkbox
+                        className="absolute right-10"
+                        disabled={(isChecked && !toggleAll)}
+                        value={toggleAll}
+                        onValueChange={(newValue) => setCheckBoxes('all', newValue)}
+                      />
+                    </View>
+
+                    <View className="flex-row justify-around mt-10">
+                      <Button title="Cancel" onPress={() => setFilterModalVisible(false)} />
+                      <Button title="Apply" disabled={!isChecked} onPress={() => {
+                        setFilterModalVisible(false);
+                        if (toggleBoxA) {filterMarkersByPermit('A'); setCurrentFilter('A'); return;}
+                        if (toggleBoxB) {filterMarkersByPermit('B'); setCurrentFilter('B'); return;}
+                        if (toggleBoxC) {filterMarkersByPermit('C'); setCurrentFilter('C'); return;}
+                        if (toggleResidential) {filterMarkersByPermit('Residence Halls'); setCurrentFilter('R'); return;}
+                        if (toggleAll) {filterMarkersByPermit('all'); setCurrentFilter('all'); return;}
+                        filterMarkersByPermit('NA');}} />
+                    </View>
+                  </View>
+                </View>
+              </Modal>
             </>
             }
           <StatusBar style="auto" />
