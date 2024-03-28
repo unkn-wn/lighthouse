@@ -1,55 +1,5 @@
-/*
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
-import { getAuth } from 'firebase/auth';
-
-const Assistant = ({ navigation }) => {
-  const [scheduleData, setScheduleData] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const username = getAuth().currentUser.displayName;
-      const docRef = doc(db, "users", username);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setScheduleData(docSnap.data().classes);
-      } else {
-        console.log("No schedule data found!");
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  return (
-    <View className="bg-white w-screen h-screen pt-20 px-8">
-      {scheduleData ? (
-        <>
-          <Text>Class Schedule:</Text>
-          {scheduleData.classnames.map((classObj, index) => (
-            <View key={index}>
-              <Text>Class: {classObj.name}</Text>
-              <Text>Address: {scheduleData.addresses[index]}</Text>
-              <Text>Start Time: {new Date(scheduleData.startTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
-<Text>End Time: {new Date(scheduleData.endTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
-              <Text>Days: {Object.entries(scheduleData.days[index]).filter(([_, value]) => value).map(([day]) => day).join(', ')}</Text>
-            </View>
-          ))}
-        </>
-      ) : (
-        <Text>Loading schedule data...</Text>
-      )}
-    </View>
-  );
-}
-
-export default Assistant;
-*/
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { getAuth } from 'firebase/auth';
@@ -58,11 +8,28 @@ import * as Location from 'expo-location';
 import Geocoder from 'react-native-geocoding';
 import { apiKey } from '@env';
 
+const auth = getAuth();
+
+const fetchUserPermit = async () => {
+  const username = auth.currentUser.displayName;
+  const docRef = doc(db, "users", username);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const userPermit = docSnap.data().permitType;
+    return userPermit;
+  } else {
+    console.log("No user document found!");
+    return null;
+  }
+};
+
 const Assistant = ({ navigation }) => {
   const [scheduleData, setScheduleData] = useState(null);
   const [parkingData, setParkingData] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [closestParkingSpots, setClosestParkingSpots] = useState([]);
+  const [selectedDay, setSelectedDay] = useState('monday');
   Geocoder.init(apiKey);
 
   useEffect(() => {
@@ -91,6 +58,8 @@ const Assistant = ({ navigation }) => {
         }
       }
       setUserLocation(location);
+
+      const userPermit = await fetchUserPermit();
 
       const querySnapshot = await getDocs(collection(db, "parking"));
       const docs = querySnapshot.docs.map(doc => ({
@@ -144,7 +113,7 @@ const Assistant = ({ navigation }) => {
         }
       }
     }
-    console.log("CLOSEST IS", closestParkingSpots, closestParkingSpots.length)
+    //console.log("CLOSEST IS", closestParkingSpots, closestParkingSpots.length)
     return closestParkingSpots;
   };
 
@@ -205,80 +174,119 @@ const Assistant = ({ navigation }) => {
     }
 
     // check if current hour is within permit start and end time at location
-    if ((permitDetails.startTime == -1 && permitDetails.endTime == -1) || (permitDetails.startTime < hour && hour < permitDetails.endTime)) {
-      // permit hierarchy
-      switch (PERMIT) {
-        case PERMIT.A:
-          if (permitDetails.permit && permitDetails.permit[0] == PERMIT.A) {
-            return true;
-          }
-        case PERMIT.B:
-          if (permitDetails.permit && permitDetails.permit[0] == PERMIT.B) {
-            return true;
-          }
-        case PERMIT.C:
-          if (permitDetails.permit && permitDetails.permit[0] == PERMIT.C) {
-            return true;
-          }
-          break;
-        case PERMIT.RES:
-          if (permitDetails.permit && permitDetails.permit[0] == PERMIT.RES) {
-            return true;
-          }
-          break;
-        default:
-          return false;
-      }
+    if ((permitDetails.startTime == -1 && permitDetails.endTime == -1) || (permitDetails.startTime > hour || hour > permitDetails.endTime)) {
+      // If there's no permit required or if the current time is outside the permit hours, anyone can park
+      return true;
     }
-    return false;
+    //console.log("my permit is", PERMIT);
+    // permit hierarchy
+    switch (PERMIT) {
+      case PERMIT.A:
+        // A permit can park in A and B and C places
+        return permitDetails.permit.includes(PERMIT.A) || permitDetails.permit.includes(PERMIT.B) || permitDetails.permit.includes(PERMIT.C);
+      case PERMIT.B:
+        // B permit can park in B and C places
+        return permitDetails.permit.includes(PERMIT.B) || permitDetails.permit.includes(PERMIT.C);
+      case PERMIT.C:
+        // C permit can only park in C places
+        return permitDetails.permit.includes(PERMIT.C);
+      case PERMIT.RES:
+        // Residence permit can only park in RES places
+        return permitDetails.permit.includes(PERMIT.RES);
+      default:
+        // No permit can only park if there's no permit required
+        return permitDetails.permit.length === 0;
+    }
   }
 
+  const handleDaySelection = (day) => {
+    setSelectedDay(day);
+  }
+
+  const dayMap = {
+    'monday': 'M',
+    'tuesday': 'T',
+    'wednesday': 'W',
+    'thursday': 'Th',
+    'friday': 'F',
+    // Add mappings for 'saturday' and 'sunday' if needed
+  };
+
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
   return (
-    <View className="bg-white w-screen h-screen pt-20 px-8">
+    <View className="bg-white w-screen h-screen pt-12 px-4">
+      <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginBottom: 20 }}>
+        <Text style={{ color: '#fe575f' }}>Go Back</Text>
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 0 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row', marginBottom: 20 }}>
+          {days.map((day) => (
+            <TouchableOpacity
+              key={day}
+              onPress={() => handleDaySelection(day)}
+              style={{ backgroundColor: selectedDay === day ? '#fe575f' : 'gray', padding: 10, marginRight: 10 }}
+            >
+              <Text style={{ color: 'white' }}>{day.charAt(0).toUpperCase() + day.slice(1)}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         {scheduleData && closestParkingSpots ? (
           <>
-            <Text>Parking Information for Class Schedule:</Text>
-            {scheduleData.classnames.map((classObj, index) => (
-              <View key={index} style={{ marginBottom: 20 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 5 }}>Class: {classObj.name}</Text>
-                <Text>Address: {scheduleData.addresses[index]}</Text>
-                <Text>Start Time: {new Date(scheduleData.startTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
-                <Text>End Time: {new Date(scheduleData.endTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
-                <Text>Days: {Object.entries(scheduleData.days[index]).filter(([_, value]) => value).map(([day]) => day).join(', ')}</Text>
-                
-                {closestParkingSpots[index] ? (
-                  <>
-                    <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Closest Parking:</Text>
-                    <Text>Name: {closestParkingSpots[index].name}</Text>
-                    <Text>Address: {closestParkingSpots[index].address}</Text>
-                    <Text>Distance: {closestParkingSpots[index].distance.toFixed(2)} km</Text>
-                    <Text>Description: {closestParkingSpots[index].desc}</Text>
-                    
-                    <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Parking Availability:</Text>
-                    {Object.entries(closestParkingSpots[index].details).map(([day, details]) => (
-                      <View key={day}>
-                        <Text style={{ fontWeight: 'bold' }}>{day.charAt(0).toUpperCase() + day.slice(1)}:</Text>
-                        <Text>Start Time: {details.startTime === -1 ? 'All Day' : `${details.startTime}:00`}</Text>
-                        <Text>End Time: {details.endTime === -1 ? 'All Day' : `${details.endTime}:00`}</Text>
-                        <Text>Permit: {details.permit.join(', ')}</Text>
-                        <Text>
-                          Can I park here?:{' '}
-                          {userPermitAppliesToLocation(closestParkingSpots[index]) ? 'Yes' : 'No'}
-                        </Text>
-                      </View>
-                    ))}
-                  </>
-                ) : (
-                  <Text>No parking information available for this address.</Text>
-                )}
-              </View>
-            ))}
+            <Text>Parking Information for {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}'s Classes:</Text>
+            {scheduleData.classnames.map((classObj, index) => {
+              if (!scheduleData.days[index][dayMap[selectedDay]]) {
+                return null; // Skip this class if it doesn't occur on the selected day
+              }
+              return (
+                <View key={index} style={{ marginBottom: 100 }}>
+                  <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 5 }}>Class: {classObj.name}</Text>
+                  <Text>Address: {scheduleData.addresses[index]}</Text>
+                  <Text>Start Time: {new Date(scheduleData.startTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
+                  <Text>End Time: {new Date(scheduleData.endTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
+                  <Text>Days: {Object.entries(scheduleData.days[index]).filter(([_, value]) => value).map(([day]) => day).join(', ')}</Text>
+                  {closestParkingSpots[index] ? (
+                    <>
+                      <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Closest Parking:</Text>
+                      <Text>Name: {closestParkingSpots[index].name}</Text>
+                      <Text>Address: {closestParkingSpots[index].address}</Text>
+                      <Text>Distance: {closestParkingSpots[index].distance.toFixed(2)} km</Text>
+                      <Text>Description: {closestParkingSpots[index].desc}</Text>
+                      
+                      <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Parking Availability:</Text>
+                      {Object.entries(closestParkingSpots[index].details).map(([day, details]) => {
+                        if (day !== selectedDay) {
+                          
+                          return null; // Skip these parking details if they're not for the selected day
+                        }
+                        return (
+                          <View key={day}>
+                            <Text style={{ fontWeight: 'bold' }}>{day.charAt(0).toUpperCase() + day.slice(1)}:</Text>
+                            <Text>Start Time: {details.startTime === -1 ? 'All Day' : `${details.startTime}:00`}</Text>
+                            <Text>End Time: {details.endTime === -1 ? 'All Day' : `${details.endTime}:00`}</Text>
+                            <Text>Permit: {details.permit.join(', ')}</Text>
+                            <Text>
+                              Can I park here?:{' '}
+                              {userPermitAppliesToLocation(closestParkingSpots[index]) ? 'Yes' : 'No'}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <Text>No parking information available for this address.</Text>
+                  )}
+                </View>
+              );
+            })}
           </>
         ) : (
-          <Text>Loading schedule and parking data...</Text>
+          <Text>Loading schedule data...</Text>
         )}
       </ScrollView>
+
     </View>
   );
 };
