@@ -49,19 +49,21 @@ const Assistant = ({ navigation }) => {
 export default Assistant;
 */
 import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { getAuth } from 'firebase/auth';
 import { PERMIT } from '../components/Permit';
 import * as Location from 'expo-location';
 import Geocoder from 'react-native-geocoding';
+import { apiKey } from '@env';
 
 const Assistant = ({ navigation }) => {
   const [scheduleData, setScheduleData] = useState(null);
   const [parkingData, setParkingData] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [closestParkingSpots, setClosestParkingSpots] = useState([]);
+  Geocoder.init(apiKey);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,10 +103,13 @@ const Assistant = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (scheduleData && parkingData) {
-      const closestSpots = findClosestParkingSpots(scheduleData, parkingData);
-      setClosestParkingSpots(closestSpots);
-    }
+    const fetchClosestSpots = async () => {
+      if (scheduleData && parkingData) {
+        const closestSpots = await findClosestParkingSpots(scheduleData, parkingData);
+        setClosestParkingSpots(closestSpots);
+      }
+    };
+    fetchClosestSpots();
   }, [scheduleData, parkingData]);
 
   const findClosestParkingSpots = async (scheduleData, parkingData) => {
@@ -112,15 +117,17 @@ const Assistant = ({ navigation }) => {
     if (scheduleData && scheduleData.addresses) {
       for (const classAddress of scheduleData.addresses) {
         try {
-          const geocodeResult = await Geocoder.geocodeAddress(classAddress);
-          if (geocodeResult.length > 0) {
-            const { latitude, longitude } = geocodeResult[0].position;
+          const geocodeResult = await Geocoder.from(classAddress);
+          if (geocodeResult != null) {
+            const latitude = geocodeResult.results[0].geometry.location.lat;
+            const longitude = geocodeResult.results[0].geometry.location.lng;
             const classCoords = { latitude, longitude };
 
             let minDistance = Infinity;
             let closestParking = null;
             for (const parking of parkingData) {
               const distance = calculateDistance(classCoords, parking.coords);
+              //console.log(distance);
               if (distance < minDistance) {
                 minDistance = distance;
                 closestParking = { ...parking, distance: minDistance };
@@ -137,6 +144,7 @@ const Assistant = ({ navigation }) => {
         }
       }
     }
+    console.log("CLOSEST IS", closestParkingSpots, closestParkingSpots.length)
     return closestParkingSpots;
   };
 
@@ -227,46 +235,50 @@ const Assistant = ({ navigation }) => {
 
   return (
     <View className="bg-white w-screen h-screen pt-20 px-8">
-      {scheduleData && closestParkingSpots.length > 0 ? (
-        <>
-          <Text>Class Schedule:</Text>
-          {scheduleData.classnames.map((classObj, index) => (
-            <View key={index}>
-              <Text>Class: {classObj.name}</Text>
-              <Text>Address: {scheduleData.addresses[index]}</Text>
-              <Text>
-                Start Time:{' '}
-                {new Date(scheduleData.startTimes[index].seconds * 1000).toLocaleTimeString([], {
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}
-              </Text>
-              <Text>
-                End Time:{' '}
-                {new Date(scheduleData.endTimes[index].seconds * 1000).toLocaleTimeString([], {
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}
-              </Text>
-              <Text>
-                Days:{' '}
-                {Object.entries(scheduleData.days[index])
-                  .filter(([_, value]) => value)
-                  .map(([day]) => day)
-                  .join(', ')}
-              </Text>
-              {closestParkingSpots[index] && (
-                <>
-                  <Text>Closest Parking: {closestParkingSpots[index].name}</Text>
-                  <Text>Distance: {closestParkingSpots[index].distance.toFixed(2)} km</Text>
-                </>
-              )}
-            </View>
-          ))}
-        </>
-      ) : (
-        <Text>Loading schedule and parking data...</Text>
-      )}
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {scheduleData && closestParkingSpots ? (
+          <>
+            <Text>Parking Information for Class Schedule:</Text>
+            {scheduleData.classnames.map((classObj, index) => (
+              <View key={index} style={{ marginBottom: 20 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 5 }}>Class: {classObj.name}</Text>
+                <Text>Address: {scheduleData.addresses[index]}</Text>
+                <Text>Start Time: {new Date(scheduleData.startTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
+                <Text>End Time: {new Date(scheduleData.endTimes[index].seconds * 1000).toLocaleTimeString([], { hour: 'numeric', minute: 'numeric' })}</Text>
+                <Text>Days: {Object.entries(scheduleData.days[index]).filter(([_, value]) => value).map(([day]) => day).join(', ')}</Text>
+                
+                {closestParkingSpots[index] ? (
+                  <>
+                    <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Closest Parking:</Text>
+                    <Text>Name: {closestParkingSpots[index].name}</Text>
+                    <Text>Address: {closestParkingSpots[index].address}</Text>
+                    <Text>Distance: {closestParkingSpots[index].distance.toFixed(2)} km</Text>
+                    <Text>Description: {closestParkingSpots[index].desc}</Text>
+                    
+                    <Text style={{ fontWeight: 'bold', marginTop: 10 }}>Parking Availability:</Text>
+                    {Object.entries(closestParkingSpots[index].details).map(([day, details]) => (
+                      <View key={day}>
+                        <Text style={{ fontWeight: 'bold' }}>{day.charAt(0).toUpperCase() + day.slice(1)}:</Text>
+                        <Text>Start Time: {details.startTime === -1 ? 'All Day' : `${details.startTime}:00`}</Text>
+                        <Text>End Time: {details.endTime === -1 ? 'All Day' : `${details.endTime}:00`}</Text>
+                        <Text>Permit: {details.permit.join(', ')}</Text>
+                        <Text>
+                          Can I park here?:{' '}
+                          {userPermitAppliesToLocation(closestParkingSpots[index]) ? 'Yes' : 'No'}
+                        </Text>
+                      </View>
+                    ))}
+                  </>
+                ) : (
+                  <Text>No parking information available for this address.</Text>
+                )}
+              </View>
+            ))}
+          </>
+        ) : (
+          <Text>Loading schedule and parking data...</Text>
+        )}
+      </ScrollView>
     </View>
   );
 };

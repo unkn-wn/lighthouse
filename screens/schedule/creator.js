@@ -233,10 +233,6 @@ const Creator = ({ navigation }) => {
                           styles={{
                             textInput: styles.input,
                           }}
-                          //ref={ref => {
-                          //  ref?.setAddressText(addresses[index])
-                          //}}
-                          //value={addresses[index] || ''}
                         />
                       </View>
                       <View className="flex flex-row gap-2">
