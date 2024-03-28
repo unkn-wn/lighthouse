@@ -30,6 +30,7 @@ const Assistant = ({ navigation }) => {
   const [userLocation, setUserLocation] = useState(null);
   const [closestParkingSpots, setClosestParkingSpots] = useState([]);
   const [selectedDay, setSelectedDay] = useState('monday');
+  const [userPermit, setUserPermit] = useState(null);
   Geocoder.init(apiKey);
 
   useEffect(() => {
@@ -59,7 +60,8 @@ const Assistant = ({ navigation }) => {
       }
       setUserLocation(location);
 
-      const userPermit = await fetchUserPermit();
+      const permit = await fetchUserPermit();
+      setUserPermit(permit);
 
       const querySnapshot = await getDocs(collection(db, "parking"));
       const docs = querySnapshot.docs.map(doc => ({
@@ -140,7 +142,7 @@ const Assistant = ({ navigation }) => {
   }
   
 
-  const userPermitAppliesToLocation = (item) => { // NOTE: CONSIDER REFRESHING PAGE IF USER CHANGES PERMIT??
+  const userPermitAppliesToLocation = (item, userPermit) => { // NOTE: CONSIDER REFRESHING PAGE IF USER CHANGES PERMIT??
     const date = new Date();
     const day = date.getDay();
     const hour = date.getHours();
@@ -180,7 +182,7 @@ const Assistant = ({ navigation }) => {
     }
     //console.log("my permit is", PERMIT);
     // permit hierarchy
-    switch (PERMIT) {
+    switch (userPermit) {
       case PERMIT.A:
         // A permit can park in A and B and C places
         return permitDetails.permit.includes(PERMIT.A) || permitDetails.permit.includes(PERMIT.B) || permitDetails.permit.includes(PERMIT.C);
@@ -269,7 +271,7 @@ const Assistant = ({ navigation }) => {
                             <Text>Permit: {details.permit.join(', ')}</Text>
                             <Text>
                               Can I park here?:{' '}
-                              {userPermitAppliesToLocation(closestParkingSpots[index]) ? 'Yes' : 'No'}
+                              {userPermitAppliesToLocation(closestParkingSpots[index], userPermit) ? 'Yes' : 'No'}
                             </Text>
                           </View>
                         );
